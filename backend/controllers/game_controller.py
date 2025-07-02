@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 
 from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
-    GameStatusResponse, FinishGameResponse
+    GameStatusResponse, FinishGameResponse, GetChoicesResponse
 )
 from ..services.interfaces import IGameService
 from ..dependencies import get_game_service
@@ -259,4 +259,71 @@ async def finish_game(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error finishing game: {str(e)}"
+        )
+
+
+@router.get(
+    "/{game_id}/step/{step_id}/choices", 
+    response_model=GetChoicesResponse,
+    summary="Get Multiple Choice Options",
+    description="Get 4 multiple choice options for a specific transformation step."
+)
+async def get_choices(
+    game_id: str,
+    step_id: int,
+    game_service: IGameService = Depends(get_game_service)
+) -> GetChoicesResponse:
+    """
+    Get 4 multiple choice options for a transformation step.
+    
+    Provides 4 Panini sutra options including the correct answer
+    and 3 randomly selected distractors for the specified step.
+    
+    **Path Parameters:**
+    - **game_id**: Unique game session identifier
+    - **step_id**: Step number within the game sequence
+    
+    **Returns:**
+    - **choices**: Array of 4 sutra options with codes and descriptions
+    
+    **Example:**
+    ```
+    GET /game/abc123/step/1/choices
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "choices": [
+        {
+          "sutra": "3.1.68",
+          "description": "Rule 3.1.68"
+        },
+        {
+          "sutra": "2.4.71",
+          "description": "Rule 2.4.71"
+        },
+        {
+          "sutra": "1.2.45",
+          "description": "Rule 1.2.45"
+        },
+        {
+          "sutra": "7.3.84",
+          "description": "Rule 7.3.84"
+        }
+      ]
+    }
+    ```
+    """
+    try:
+        return await game_service.get_choices(game_id, step_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting choices: {str(e)}"
         )
