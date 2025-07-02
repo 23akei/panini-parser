@@ -204,7 +204,7 @@ class GameService(IGameService):
         for sutra in all_choices:
             # Simple description (you can enhance this with actual rule descriptions)
             print(sutra)
-            choices.append(SutraChoice(sutra=sutra.code, description=sutra.text))
+            choices.append(SutraChoice(sutra=sutra.code, description=self._to_devanagari(sutra.text)))
         
         return GetChoicesResponse(choices=choices)
 
