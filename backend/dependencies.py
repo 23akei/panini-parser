@@ -42,30 +42,18 @@ def get_stats_repository() -> IStatsRepository:
 
 
 # Service instances
-def get_word_service(
-    word_repository: IWordRepository = None
-) -> WordService:
+def get_word_service() -> WordService:
     """Get word service instance"""
-    if word_repository is None:
-        word_repository = get_word_repository()
+    word_repository = get_word_repository()
     return WordService(word_repository)
 
 
-def get_game_service(
-    game_repository: IGameRepository = None,
-    word_repository: IWordRepository = None,
-    leaderboard_repository: ILeaderboardRepository = None,
-    stats_repository: IStatsRepository = None
-) -> GameService:
+def get_game_service() -> GameService:
     """Get game service instance"""
-    if game_repository is None:
-        game_repository = get_game_repository()
-    if word_repository is None:
-        word_repository = get_word_repository()
-    if leaderboard_repository is None:
-        leaderboard_repository = get_leaderboard_repository()
-    if stats_repository is None:
-        stats_repository = get_stats_repository()
+    game_repository = get_game_repository()
+    word_repository = get_word_repository()
+    leaderboard_repository = get_leaderboard_repository()
+    stats_repository = get_stats_repository()
     
     return GameService(
         game_repository,

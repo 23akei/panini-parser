@@ -7,7 +7,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from .api.routes import router as legacy_router
 from .controllers.word_controller import router as word_router
 from .controllers.game_controller import router as game_router
 
@@ -27,20 +26,8 @@ app.add_middleware(
 )
 
 # Include API routes
-app.include_router(legacy_router, prefix="/api/v1", tags=["legacy"])
-app.include_router(word_router, prefix="/api/v1")
+# app.include_router(word_router, prefix="/api/v1")
 app.include_router(game_router, prefix="/api/v1")
-
-
-@app.get("/")
-async def root():
-    """Root endpoint"""
-    return {
-        "message": "Panini Parser API",
-        "version": "0.1.0",
-        "docs": "/docs"
-    }
-
 
 def start_server():
     """Start the FastAPI server - used by CLI script"""
