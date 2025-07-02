@@ -16,8 +16,8 @@ class StartGameRequest(BaseModel):
 class GameStep(BaseModel):
     """Individual game step"""
     id: int
-    from_: str = Field(alias="from", description="Starting Sanskrit form")
-    to: str = Field(description="Target Sanskrit form")
+    from_word: str = Field( description="Starting Sanskrit form")
+    to_word: str = Field(description="Target Sanskrit form")
     hint: Optional[str] = None
 
 

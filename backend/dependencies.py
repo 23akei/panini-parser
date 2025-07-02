@@ -48,17 +48,9 @@ def get_word_service() -> WordService:
     word_repository = get_word_repository()
     return WordService(word_repository)
 
+sessions = {}
 
+@lru_cache()
 def get_game_service() -> IGameService:
     """Get game service instance"""
-    game_repository = get_game_repository()
-    word_repository = get_word_repository()
-    leaderboard_repository = get_leaderboard_repository()
-    stats_repository = get_stats_repository()
-    
-    return GameService(
-        game_repository,
-        word_repository,
-        leaderboard_repository,
-        stats_repository
-    )
+    return GameService(sessions=sessions)

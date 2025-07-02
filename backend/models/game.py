@@ -5,7 +5,8 @@ Data models for game sessions and user progress
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from vidyut.prakriya import Step,Prakriya, Dhatu, Pada, Prayoga, Lakara, Purusha, Vacana, Linga, Vibhakti, Gana
 
 
 class GameDifficulty(str, Enum):
@@ -35,20 +36,11 @@ class AnswerStatus(str, Enum):
 class GameSession(BaseModel):
     """Model representing a game session"""
     id: Optional[str] = None       # UUID string
-    user_id: Optional[str] = None  # For future user management
-    difficulty: GameDifficulty = GameDifficulty.BEGINNER
-    status: GameStatus = GameStatus.ACTIVE
-    score: int = 0
-    max_score: int = 0
-    words_attempted: int = 0
-    words_correct: int = 0
-    current_word_id: Optional[int] = None
-    started_at: datetime
-    completed_at: Optional[datetime] = None
-    total_time_seconds: Optional[int] = None
-
-    class Config:
-        from_attributes = True
+    root: str
+    objective: str
+    history: list[Step] = []
+    current_step: int = 1
+    model_config = ConfigDict(arbitrary_types_allowed = True)
 
 
 class GameAnswer(BaseModel):
