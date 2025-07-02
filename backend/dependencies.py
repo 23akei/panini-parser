@@ -15,6 +15,7 @@ from .repositories.interfaces import (
 from .services.interfaces import IGameService, IWordService
 from .services.word_service import WordService
 from .services.game_service import GameService
+from vidyut.kosha import Kosha
 
 
 # Repository instances (singletons for memory repositories)
@@ -49,8 +50,9 @@ def get_word_service() -> WordService:
     return WordService(word_repository)
 
 sessions = {}
+kosha = Kosha("backend/vidyut-0.4.0/kosha")
 
 @lru_cache()
 def get_game_service() -> IGameService:
     """Get game service instance"""
-    return GameService(sessions=sessions)
+    return GameService(kosha=kosha,sessions=sessions )

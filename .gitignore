@@ -6,3 +6,4 @@ CLAUDE.md
 node_modules
 __pycache__
 *.egg-info
+backend/vidyut-0.4.0
