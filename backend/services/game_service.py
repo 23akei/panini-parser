@@ -49,16 +49,16 @@ class GameService(IGameService):
             steps.append(
                 GameStep(
                     id=i + 1,
-                    from_word=self._to_devanagari(from_word),
-                    to_word=self._to_devanagari(to_word),
+                    from_word=self._convert(from_word, level=request.level),
+                    to_word=self._convert(to_word, level=request.level),
                     hint=None,
                 )
             )
             from_word = to_word  # Update from_word for next step
         session= GameSession(
             id=game_id,
-            root=self._to_devanagari(dhatu.aupadeshika),
-            objective=self._to_devanagari(prakriya.text),
+            root=self._convert(dhatu.aupadeshika, level=request.level),
+            objective=self._convert(prakriya.text, level=request.level),
             history=prakriya.history,
             current_step=1,  # Start at the first step
             started_at=datetime.now()
@@ -246,8 +246,13 @@ class GameService(IGameService):
         else:
             return "Bronze"
     
-    def _to_devanagari(self, txt: str) -> str:
+    def _convert(self, txt: str, level: str) -> str:
         """Convert Sanskrit text to Devanagari script"""
         # Placeholder for actual conversion logic
         # This could use a library or custom mapping
-        return transliterate('gala~', Scheme.Slp1, Scheme.Devanagari)
+        if level == 'expert':
+            to_scheme = Scheme.Devanagari
+        else:
+            to_scheme = Scheme.Slp1
+            
+        return transliterate(txt, Scheme.Slp1, to_scheme)
