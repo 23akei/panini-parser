@@ -6,31 +6,7 @@ import PlayArea from '../components/PlayArea';
 import RuleInputForm from '../components/RuleInputForm';
 import DifficultySelector from '../components/DifficultySelector';
 import HPDisplay from '../components/HPDisplay';
-
-interface Question {
-  word: string;
-  case: string;
-  number: string;
-  expected: string;
-  rule: string;
-}
-
-interface GameScreenProps {
-  gameState: 'stopped' | 'playing' | 'paused';
-  timer: number;
-  hitPoints: number;
-  currentQuestion: string;
-  userRule: string;
-  playerScore: number;
-  difficulty: 'EASY' | 'HARD';
-  currentQuestionData: Question;
-  startGame: () => void;
-  pauseGame: () => void;
-  resetGame: () => void;
-  handleRuleSubmit: () => void;
-  setUserRule: (rule: string) => void;
-  changeDifficulty: () => void;
-}
+import type { GameScreenProps } from '../types/interfaces';
 
 const HardGameScreen: React.FC<GameScreenProps> = ({
   gameState,

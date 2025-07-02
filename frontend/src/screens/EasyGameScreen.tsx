@@ -1,31 +1,7 @@
 import React from 'react';
+import type { GameScreenProps } from '../types/interfaces';
 
-interface Question {
-  word: string;
-  case: string;
-  number: string;
-  expected: string;
-  rule: string;
-}
-
-interface EasyGameScreenProps {
-  gameState: 'stopped' | 'playing' | 'paused';
-  timer: number;
-  hitPoints: number;
-  currentQuestion: string;
-  userRule: string;
-  playerScore: number;
-  difficulty: 'EASY' | 'HARD';
-  currentQuestionData: Question;
-  startGame: () => void;
-  pauseGame: () => void;
-  resetGame: () => void;
-  handleRuleSubmit: () => void;
-  setUserRule: (rule: string) => void;
-  changeDifficulty: () => void;
-}
-
-const EasyGameScreen: React.FC<EasyGameScreenProps> = ({
+const EasyGameScreen: React.FC<GameScreenProps> = ({
   gameState,
   timer,
   hitPoints,

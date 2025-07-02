@@ -6,31 +6,7 @@ import PlayArea from '../components/PlayArea';
 import RuleInputForm from '../components/RuleInputForm';
 import DifficultySelector from '../components/DifficultySelector';
 import HPDisplay from '../components/HPDisplay';
-
-interface Question {
-  word: string;
-  case: string;
-  number: string;
-  expected: string;
-  rule: string;
-}
-
-interface PlayerProps {
-  gameState: 'stopped' | 'playing' | 'paused';
-  timer: number;
-  hitPoints: number;
-  currentQuestion: string;
-  userRule: string;
-  playerScore: number;
-  difficulty: 'EASY' | 'HARD';
-  currentQuestionData: Question;
-  startGame: () => void;
-  pauseGame: () => void;
-  resetGame: () => void;
-  handleRuleSubmit: () => void;
-  setUserRule: (rule: string) => void;
-  changeDifficulty: () => void;
-}
+import type { PlayerProps } from '../types/interfaces';
 
 interface HardGameMultiScreenProps {
   player1: PlayerProps;
@@ -60,7 +36,7 @@ const PlayerSection: React.FC<PlayerProps & { playerName: string }> = ({
       
       <div className="flex justify-between items-center mb-4 border-b pb-3">
         <div className="flex items-center space-x-2">
-          <QuestionDisplay currentQuestion={currentQuestion} />
+          <QuestionDisplay currentQuestion={currentQuestionData.from} />
           <GameControls
             gameState={gameState}
             onStart={startGame}

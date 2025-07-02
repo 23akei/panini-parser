@@ -1,19 +1,6 @@
 import React from 'react';
 import ScoreDisplay from './ScoreDisplay';
-
-interface Question {
-  word: string;
-  case: string;
-  number: string;
-  expected: string;
-  rule: string;
-}
-
-interface PlayAreaProps {
-  currentQuestion: string;
-  currentQuestionData: Question | undefined;
-  playerScore: number;
-}
+import type { PlayAreaProps } from '../types/interfaces';
 
 const PlayArea: React.FC<PlayAreaProps> = ({ 
   currentQuestion, 

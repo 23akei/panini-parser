@@ -8,14 +8,7 @@ import HomeScreen from './screens/HomeScreen';
 import ModeSelectScreen from './screens/ModeSelectScreen';
 import GameClearScreen from './screens/GameClearScreen';
 import GameFailedScreen from './screens/GameFailedScreen';
-
-interface Question {
-  word: string;
-  case: string;
-  number: string;
-  expected: string;
-  rule: string;
-}
+import type Question from './types/interfaces';
 
 const SanskritGrammarGame = () => {
   const [gameState, setGameState] = useState<'stopped' | 'playing' | 'paused'>('stopped');
@@ -40,20 +33,36 @@ const SanskritGrammarGame = () => {
 
   const questions: Question[] = [
     {
-      word: 'राम',
-      case: '主格',
-      number: '単数',
-      expected: 'रामः',
-      rule: 'अकारान्त पुल्लिङ्ग प्रथमा एकवचन'
+      id: 1,
+      from: 'word1',
+      to: 'word2',
+      hint: 'hint_1_to_2'
     },
     {
-      word: 'देव',
-      case: '対格',
-      number: '複数',
-      expected: 'देवान्',
-      rule: 'अकारान्त पुल्लिङ्ग द्वितीया बहुवचन'
+      id: 2,
+      from: 'word2',
+      to: 'word3',
+      hint: 'hint_2_to_3'
+    },
+    {
+      id: 3,
+      from: 'word3',
+      to: 'word4',
+      hint: 'hint_3_to_4'
+    },
+    {
+      id: 4,
+      from: 'word4',
+      to: 'word5',
+      hint: 'hint_4_to_5'
+    },
+    {
+      id: 5,
+      from: 'word5',
+      to: '',
+      hint: 'hint_5_to_end'
     }
-  ];
+  ]
 
   const [currentQuestionData, setCurrentQuestionData] = useState<Question>(questions[0]);
   const [currentQuestionData2, setCurrentQuestionData2] = useState<Question>(questions[0]);
