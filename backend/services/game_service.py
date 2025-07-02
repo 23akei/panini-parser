@@ -4,9 +4,10 @@ Service layer for game-related business logic
 
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 
 from .interfaces import IGameService
+from .word_service import WordService
 from ..repositories.interfaces import IGameRepository, IWordRepository, ILeaderboardRepository, IStatsRepository
 from ..models.game import GameSession, GameAnswer, GameDifficulty, GameStatus, AnswerStatus
 from ..dto.game_dto import (
@@ -20,27 +21,43 @@ class GameService(IGameService):
 
     def __init__(
         self,
-        game_repository: IGameRepository,
-        word_repository: IWordRepository,
-        leaderboard_repository: ILeaderboardRepository,
-        stats_repository: IStatsRepository
+        sessions: Optional[Dict[str, GameSession]] = None,
     ):
-        self._game_repository = game_repository
-        self._word_repository = word_repository
-        self._leaderboard_repository = leaderboard_repository
-        self._stats_repository = stats_repository
+        self.sessions = sessions if sessions is not None else {}
+        self._word_service = WordService()
 
     async def start_game(self, request: StartGameRequest) -> StartGameResponse:
         """Start a new game session"""
         # Generate unique game ID
         game_id = str(uuid.uuid4())
+        dhatu = self._word_service.get_random_dhatu()
+        prakriya = self._word_service.get_random_prakriya(dhatu)
 
-        # Generate sample steps for demonstration
-        steps = [
-            GameStep(id=1, from_="गम्", to="गच्छ", hint=None),
-            GameStep(id=2, from_="गच्छ", to="गच्छति", hint=None)
-        ]
+        steps = []
+        from_word = dhatu.aupadeshika
+        for i, step in enumerate(prakriya.history):
+            print(f"Step {i + 1}: {step}, Code: {step.code}, Result: {step.result}")
+                  
+            to_word = ''.join(step.result)
+            steps.append(
+                GameStep(
+                    id=i + 1,
+                    from_word=from_word,
+                    to_word=to_word,
+                    hint=None,
+                )
+            )
+            from_word = to_word  # Update from_word for next step
+        session= GameSession(
+            id=game_id,
+            root=dhatu.aupadeshika,
+            objective=prakriya.text,
+            history=prakriya.history,
+            current_step=1  # Start at the first step
+        )
+        self.sessions[game_id] = session
         
+
         return StartGameResponse(
             game_id=game_id,
             steps=steps
@@ -49,25 +66,27 @@ class GameService(IGameService):
     async def submit_answer(self, game_id: str, step_id: int, request: SubmitAnswerRequest) -> SubmitAnswerResponse:
         """Submit an answer for the current word"""
         # Validate game exists (simplified for demo)
-        if not game_id:
+        session = self.sessions.get(game_id, None)
+        if not session:
             raise ValueError("Game session not found")
+        if step_id < 1 or step_id > len(session.history):
+            raise ValueError("Invalid step ID")
+        if session.current_step != step_id:
+            return SubmitAnswerResponse(
+                correct=False,
+                explanation="You can only submit an answer for the current step.",
+                next_step_id=session.current_step
+            )
+        is_correct = session.history[step_id-1].code == request.sutra
+        next_step_id = step_id + 1 if is_correct and step_id < len(session.history) else step_id
+        self.sessions[game_id].current_step = next_step_id
 
         # Simple evaluation for demonstration
-        correct_sutras = {"3.1.68", "1.4.14", "3.2.123"}  # Sample correct answers
-        is_correct = request.sutra in correct_sutras
-        
-        explanation = (
-            f"Correct! Rule {request.sutra} applies to this transformation." 
-            if is_correct 
-            else f"Incorrect. The correct rule for this transformation is 3.1.68."
-        )
-        
-        next_step_id = step_id + 1 if step_id < 5 else None  # Assume max 5 steps
 
         return SubmitAnswerResponse(
             correct=is_correct,
-            explanation=explanation,
-            next_step_id=next_step_id
+            explanation=f"The rule {request.sutra} {'is' if is_correct else 'is not'} applicable to the transformation.",
+            next_step_id=step_id + 1 if is_correct and step_id < len(session.history) else step_id
         )
 
     async def get_game_status(self, game_id: str) -> GameStatusResponse:
