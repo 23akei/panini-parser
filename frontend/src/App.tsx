@@ -177,42 +177,44 @@ const SanskritGrammarGame = () => {
   };
 
   // プレイヤー1のルール入力処理
-  const handleRuleSubmit = (questions: Question[]) => {
+  const handleRuleSubmit = (_questionsParam: Question[]) => {
+    // 常にstateのquestionsを使用する
+    if (!questions || questions.length === 0) return;
+    
     const currentQ = questions[currentQuestionDataIndex];
     
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore(prev => prev + 10);
-    alert('正解！');
+    alert('プレイヤー1: 正解！');
 
     damageHP2();
 
     if (currentQuestionDataIndex < questions.length - 1) {
       const nextIndex = currentQuestionDataIndex + 1;
-      const nextQ = questions[nextIndex];
       setCurrentQuestionDataIndex(nextIndex);
-      //setCurrentQuestionData(nextQ);
     } else {
       handleGameWin(); // 全問題終了でゲームクリア
     }
   };
 
   // プレイヤー2のルール入力処理
-  const handleRuleSubmit2 = (questions: Question[]) => {
+  const handleRuleSubmit2 = (_questionsParam: Question[]) => {
+    // 常にstateのquestionsを使用する
+    if (!questions || questions.length === 0) return;
+    
     const currentQ = questions[currentQuestionDataIndex];
     
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore2(prev => prev + 10);
-    alert('正解！');
+    alert('プレイヤー2: 正解！');
 
     damageHP();
 
     if (currentQuestionDataIndex < questions.length - 1) {
       const nextIndex = currentQuestionDataIndex + 1;
-      const nextQ = questions[nextIndex];
       setCurrentQuestionDataIndex(nextIndex);
-      //setCurrentQuestionData(nextQ);
     } else {
       handleGameWin(); // 全問題終了でゲームクリア
     }
@@ -256,7 +258,7 @@ const SanskritGrammarGame = () => {
           <HardGameMultiScreen 
             gameState={gameState}
             timer={timer}
-            questions={questions}
+            questions={questions || []} /* nullチェック追加 */
             currentQuestionDataIndex={currentQuestionDataIndex}
             difficulty={difficulty}
             startGame={startGame}
@@ -266,6 +268,8 @@ const SanskritGrammarGame = () => {
               gameState: gameState,
               hitPoints: hitPoints,
               playerScore: playerScore,
+              questions: questions || [], /* questions情報を追加 */
+              currentQuestionDataIndex: currentQuestionDataIndex,
               setUserInput: setUserInput,
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player 1"
@@ -274,6 +278,8 @@ const SanskritGrammarGame = () => {
               gameState: gameState,
               hitPoints: hitPoints2,
               playerScore: playerScore2,
+              questions: questions || [], /* questions情報を追加 */
+              currentQuestionDataIndex: currentQuestionDataIndex,
               setUserInput: setUserInput2,
               handleRuleSubmit: handleRuleSubmit2,
               playerName: "Player 2"

@@ -35,7 +35,6 @@ const PlayerSection: React.FC<PlayerProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
       <h2 className="text-xl font-bold mb-4 text-center">{playerName}</h2>
-      <pre>{handleRuleSubmit.toString()}</pre>
       <div className="flex justify-between items-center mb-4 border-b pb-3">
         <div className="flex items-center space-x-4">
           <HPDisplay hitPoints={hitPoints} />
@@ -86,11 +85,21 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
         <Timer timer={timer} />
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
-          <PlayerSection {...player1} playerName="Player 1" />
+          <PlayerSection 
+            {...player1} 
+            playerName="Player 1" 
+            questions={questions || []}
+            currentQuestionDataIndex={currentQuestionDataIndex}
+          />
         </div>
         
         <div style={{ width: '50%', minWidth: '400px' }}>
-          <PlayerSection {...player2} playerName="Player 2" />
+          <PlayerSection 
+            {...player2} 
+            playerName="Player 2" 
+            questions={questions || []}
+            currentQuestionDataIndex={currentQuestionDataIndex}
+          />
         </div>
       </div>
     </div>

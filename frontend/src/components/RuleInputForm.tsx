@@ -23,7 +23,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
               Enter Panini Rule:
             </label>
             <textarea
-              value=""
+              value={undefined} // これにより、コンポーネントは非制御モードで動作します
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="Example: अकारान्त पुल्लिङ्ग प्रथमा एकवचन"
@@ -31,7 +31,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
             />
           </div>
           <button
-            onClick={onSubmit}
+            onClick={() => onSubmit([])} /* 空配列は後でPlayerSectionで置き換えられます */
             disabled={gameState !== 'playing'}
             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors"
           >
