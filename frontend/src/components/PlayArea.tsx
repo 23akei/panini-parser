@@ -4,6 +4,8 @@ import type { PlayAreaProps } from '../types/interfaces';
 
 const PlayArea: React.FC<PlayAreaProps> = ({
   currentQuestion,
+  currentQuestionData,
+  playerScore,
   currentStep,
   score,
   currentStepNumber,
@@ -22,11 +24,11 @@ const PlayArea: React.FC<PlayAreaProps> = ({
                 <strong>Root:</strong> <span className="font-devanagari text-xl">{currentQuestion}</span>
               </div>
               <div className="text-sm text-gray-600">
-                <strong>Desired Form:</strong> {currentQuestionData.case} {currentQuestionData.number}
+                <strong>Target Form:</strong> {currentQuestionData?.to}
               </div>
               <div className="text-sm text-gray-600 mt-2">
-                <strong>Expected Form:</strong>
-                <span className="font-devanagari text-lg ml-2">{currentQuestionData.expected}</span>
+                <strong>Hint:</strong>
+                <span className="font-devanagari text-lg ml-2">{currentQuestionData?.hint || 'No hint available'}</span>
               </div>
             </div>
           )}

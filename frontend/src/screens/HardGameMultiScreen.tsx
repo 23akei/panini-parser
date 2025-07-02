@@ -55,6 +55,10 @@ const PlayerSection: React.FC<PlayerProps & { playerName: string }> = ({
           currentQuestion={currentQuestion}
           currentQuestionData={currentQuestionData}
           playerScore={playerScore}
+          currentStep={1}
+          score={playerScore}
+          currentStepNumber={1}
+          totalSteps={5}
         />
 
         <RuleInputForm

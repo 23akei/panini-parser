@@ -46,6 +46,10 @@ const HardGameScreen: React.FC<GameScreenProps> = ({
             currentQuestion={currentQuestion}
             currentQuestionData={currentQuestionData}
             playerScore={playerScore}
+            currentStep={1}
+            score={playerScore}
+            currentStepNumber={1}
+            totalSteps={5}
           />
 
           <RuleInputForm

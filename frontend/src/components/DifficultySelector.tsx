@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface DifficultySelectorProps {
-  difficulty: 'beginner' | 'intermediate' | 'expert';
+  difficulty: 'EASY' | 'HARD' | 'beginner' | 'intermediate' | 'expert';
   onChangeDifficulty: () => void;
 }
 
@@ -14,7 +14,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
       <button
         onClick={onChangeDifficulty}
         className={`px-8 py-3 rounded-lg font-bold text-xl transition-colors ${
-          difficulty === 'beginner' ? 'bg-green-500 text-white' :
+          difficulty === 'beginner' || difficulty === 'EASY' ? 'bg-green-500 text-white' :
           difficulty === 'intermediate' ? 'bg-yellow-500 text-white' :
           'bg-red-500 text-white'
         }`}

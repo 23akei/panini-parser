@@ -50,10 +50,9 @@ const PlayerSection: React.FC<PlayerProps & { playerName: string }> = ({
       </div>
       {gameState === 'playing' && currentQuestionData && (
         <div style={{ marginTop: '20px' }}>
-          <h3>Question: {currentQuestionData.word}</h3>
-          <p>Case: {currentQuestionData.case}</p>
-          <p>Number: {currentQuestionData.number}</p>
-          <p>Expected Form: {currentQuestionData.expected}</p>
+          <h3>From: {currentQuestionData.from}</h3>
+          <p>To: {currentQuestionData.to}</p>
+          <p>Hint: {currentQuestionData.hint || 'No hint available'}</p>
           <input
             type="text"
             value={userRule}

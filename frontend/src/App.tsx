@@ -24,10 +24,14 @@ const SanskritGrammarGame = () => {
   const [timer, setTimer] = useState(61);
   const [hitPoints, setHitPoints] = useState(MAXIMUM_HIT_POINTS);
   const [userRule, setUserRule] = useState('');
-  const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'expert'>('beginner');
 
   // API hooks
-  const { startGame, submitAnswer, finishGame, isLoading, error } = useGameOperations();
+  const { startGame: startGameMutation, submitAnswer, finishGame, isLoading, error } = useGameOperations();
+  
+  // API state
+  const [currentGameData, setCurrentGameData] = useState<StartGameResponse | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  
   const {
     data: gameStatus
   } = useGameStatus(
@@ -48,6 +52,11 @@ const SanskritGrammarGame = () => {
   const [userRule2, setUserRule2] = useState('');
   const [playerScore2, setPlayerScore2] = useState(192);
 
+  // Map UI difficulty to API difficulty
+  const mapDifficultyToApiLevel = (difficulty: 'EASY' | 'HARD'): string => {
+    return difficulty === 'EASY' ? 'beginner' : 'expert';
+  };
+  
   // 問題データを取得する関数
   const getQuestions = (): Question[] => {
     // 将来的には外部APIやサービスから取得する予定
@@ -133,7 +142,7 @@ const SanskritGrammarGame = () => {
     }
   }, [gameState2, timer2, gameMode]);
 
-  const startGame = () => {
+  const startLocalGame = () => {
     if (gameState === 'stopped') {
       resetGame();
     } else {
@@ -195,8 +204,12 @@ const SanskritGrammarGame = () => {
     setGameState('paused');
   };
 
-    const pauseGame2 = () => {
+  const pauseGame2 = () => {
     setGameState2('paused');
+  };
+  
+  const pauseGame = () => {
+    setGameState('paused');
   };
 
   const resetGame = () => {
@@ -301,12 +314,20 @@ const SanskritGrammarGame = () => {
 
     if (gameMode === 'single') {
       resetGame();
-      startGame();
+      // Start API game
+      const apiLevel = mapDifficultyToApiLevel(selectedDifficulty);
+      startGameMutation.mutate({ level: apiLevel, length: 5 }, {
+        onSuccess: (data) => {
+          setCurrentGameData(data);
+          setCurrentStepIndex(0);
+          setGameState('playing');
+        }
+      });
     } else {
       // 対戦モードの場合は両方のプレイヤーをリセット
       resetGame();
       resetGame2();
-      startGame();
+      startLocalGame();
       startGame2();
     }
   };
@@ -334,9 +355,9 @@ const SanskritGrammarGame = () => {
             userRule={userRule}
             playerScore={playerScore}
             difficulty={difficulty}
-            currentQuestionData={currentQuestionData}
-            startGame={startGame}
-            pauseGame={pauseGame}
+            currentQuestionData={currentQuestionData || { id: 0, from: '', to: '', hint: null }}
+            startGame={startLocalGame}
+            pauseGame={handlePauseGame}
             resetGame={resetGame}
             handleRuleSubmit={handleRuleSubmit}
             setUserRule={setUserRule}
@@ -351,9 +372,9 @@ const SanskritGrammarGame = () => {
             userRule={userRule}
             playerScore={playerScore}
             difficulty={difficulty}
-            currentQuestionData={currentQuestionData}
-            startGame={startGame}
-            pauseGame={pauseGame}
+            currentQuestionData={currentQuestionData || { id: 0, from: '', to: '', hint: null }}
+            startGame={startLocalGame}
+            pauseGame={handlePauseGame}
             resetGame={resetGame}
             handleRuleSubmit={handleRuleSubmit}
             setUserRule={setUserRule}
@@ -373,9 +394,9 @@ const SanskritGrammarGame = () => {
               userRule,
               playerScore,
               difficulty,
-              currentQuestionData,
-              startGame,
-              pauseGame,
+              currentQuestionData: currentQuestionData || { id: 0, from: '', to: '', hint: null },
+              startGame: startLocalGame,
+              pauseGame: handlePauseGame,
               resetGame,
               handleRuleSubmit,
               setUserRule,
@@ -390,7 +411,7 @@ const SanskritGrammarGame = () => {
               userRule: userRule2,
               playerScore: playerScore2,
               difficulty,
-              currentQuestionData: currentQuestionData2,
+              currentQuestionData: currentQuestionData2 || { id: 0, from: '', to: '', hint: null },
               startGame: startGame2,
               pauseGame: pauseGame2,
               resetGame: resetGame2,
@@ -409,9 +430,9 @@ const SanskritGrammarGame = () => {
               userRule,
               playerScore,
               difficulty,
-              currentQuestionData,
-              startGame,
-              pauseGame,
+              currentQuestionData: currentQuestionData || { id: 0, from: '', to: '', hint: null },
+              startGame: startLocalGame,
+              pauseGame: handlePauseGame,
               resetGame,
               handleRuleSubmit,
               setUserRule,
@@ -426,7 +447,7 @@ const SanskritGrammarGame = () => {
               userRule: userRule2,
               playerScore: playerScore2,
               difficulty,
-              currentQuestionData: currentQuestionData2,
+              currentQuestionData: currentQuestionData2 || { id: 0, from: '', to: '', hint: null },
               startGame: startGame2,
               pauseGame: pauseGame2,
               resetGame: resetGame2,

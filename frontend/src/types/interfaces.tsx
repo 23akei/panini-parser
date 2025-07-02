@@ -1,15 +1,17 @@
 // 共通のインターフェース定義
-export interface Question {
-  id: number;
-  from: string;
-  to: string;
-  hint: string;
-}
+import type { GameStep } from '../api/client';
+
+// Use GameStep from OpenAPI instead of local Question interface
+export type Question = GameStep;
 
 export interface PlayAreaProps {
   currentQuestion: string;
   currentQuestionData: Question | undefined;
   playerScore: number;
+  currentStep: number;
+  score: number;
+  currentStepNumber: number;
+  totalSteps: number;
 }
 
 export interface GameScreenProps {
