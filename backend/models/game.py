@@ -40,6 +40,10 @@ class GameSession(BaseModel):
     objective: str
     history: list[Step] = []
     current_step: int = 1
+    started_at: datetime 
+    score: int = 0
+    correct_answers: int = 0
+    mistakes: int = 0
     model_config = ConfigDict(arbitrary_types_allowed = True)
 
 
