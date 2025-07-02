@@ -3,13 +3,13 @@ Data Transfer Objects for game-related API endpoints
 Based on API specification in backend/README.md
 """
 
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 
 class StartGameRequest(BaseModel):
     """Request DTO for GET /game/start"""
-    level: str = Field(default="beginner", description="Difficulty level: beginner, intermediate, expert")
+    level: Literal["beginner", "expert"] = Field(default="beginner", description="Difficulty level: beginner, expert")
     length: int = Field(default=5, ge=1, le=20, description="Number of steps in the game")
 
 

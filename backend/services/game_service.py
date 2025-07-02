@@ -37,7 +37,7 @@ class GameService(IGameService):
         from_word = dhatu.aupadeshika
         for i, step in enumerate(prakriya.history):
             print(f"Step {i + 1}: {step}, Code: {step.code}, Result: {step.result}")
-                  
+
             to_word = ''.join(step.result)
             steps.append(
                 GameStep(
@@ -56,7 +56,7 @@ class GameService(IGameService):
             current_step=1  # Start at the first step
         )
         self.sessions[game_id] = session
-        
+
 
         return StartGameResponse(
             game_id=game_id,
@@ -133,10 +133,10 @@ class GameService(IGameService):
                 "next": ["1.4.15", "1.4.16"]
             }
         }
-        
+
         if sutra not in sample_rules:
             raise ValueError(f"Rule {sutra} not found")
-            
+
         rule_data = sample_rules[sutra]
         return RuleDetailsResponse(
             sutra=sutra,
