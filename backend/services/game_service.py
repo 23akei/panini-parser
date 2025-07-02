@@ -184,22 +184,27 @@ class GameService(IGameService):
         
         # Get the correct answer
         correct_code = session.history[step_id-1].code
+        correct_sutras = [sutra for sutra in self.sutras if sutra.code == correct_code]
+        print(f"Correct code: {correct_code}, Sutras: {correct_sutras}")
+        if not correct_sutras:
+            raise ValueError(f"No sutra found for code {correct_code}")
+        correct_sutra  = correct_sutras[0]  # Use the first match if multiple found
         
         # Get 3 random wrong choices
-        wrong_choices = random.sample([code for code in self.sutra_codes if code != correct_code], 3)
+        print(f"Correct sutra: {correct_sutra}")
+        wrong_choices = random.sample([sutra for sutra in self.sutras if sutra.code != correct_code], 3)
         
         # Combine and shuffle choices
-        all_choices = [correct_code] + wrong_choices
-        print(f"Correct choice: {correct_code}, Wrong choices: {wrong_choices}")
+        all_choices = [correct_sutra] + wrong_choices
+        print(f"Correct choice: {correct_sutra}, Wrong choices: {wrong_choices}")
         random.shuffle(all_choices)
         
         # Create choice objects with descriptions
         choices = []
-        for code in all_choices:
+        for sutra in all_choices:
             # Simple description (you can enhance this with actual rule descriptions)
-            print(code)
-            description = f"Rule {code}"
-            choices.append(SutraChoice(sutra=code, description=description))
+            print(sutra)
+            choices.append(SutraChoice(sutra=sutra.code, description=sutra.text))
         
         return GetChoicesResponse(choices=choices)
 

@@ -31,6 +31,13 @@ export interface GameScreenProps {
   changeDifficulty: () => void;
 }
 
-export interface PlayerProps extends GameScreenProps {
-  playerName?: string; // オプショナルにする
+export interface PlayerProps {
+  gameState: 'stopped' | 'playing' | 'paused';
+  hitPoints: number;
+  playerScore: number;
+  questions: Question[];
+  currentQuestionDataIndex: number;
+  setUserInput: (input: string) => void;
+  handleRuleSubmit: (questions: Question[]) => void;
+  playerName: string;
 }
