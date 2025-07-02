@@ -1,157 +1,65 @@
 """
 Data Transfer Objects for game-related API endpoints
+Based on API specification in backend/README.md
 """
 
-from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-from ..models.game import GameDifficulty, GameStatus, AnswerStatus
-
 
 class StartGameRequest(BaseModel):
-    """Request DTO for starting a new game session"""
-    difficulty: GameDifficulty = Field(default=GameDifficulty.BEGINNER)
-    user_id: Optional[str] = Field(None, max_length=100)
+    """Request DTO for GET /game/start"""
+    level: str = Field(default="beginner", description="Difficulty level: beginner, intermediate, expert")
+    length: int = Field(default=5, ge=1, le=20, description="Number of steps in the game")
+
+
+class GameStep(BaseModel):
+    """Individual game step"""
+    id: int
+    from_: str = Field(alias="from", description="Starting Sanskrit form")
+    to: str = Field(description="Target Sanskrit form")
+    hint: Optional[str] = None
 
 
 class StartGameResponse(BaseModel):
-    """Response DTO for starting a game session"""
-    session_id: str
-    difficulty: GameDifficulty
-    message: str
-    current_word: str
-    current_word_id: int
-    instructions: str
-    max_time_seconds: Optional[int] = None
+    """Response DTO for GET /game/start"""
+    gameId: str = Field(alias="game_id")
+    steps: List[GameStep]
 
 
 class SubmitAnswerRequest(BaseModel):
-    """Request DTO for submitting an answer"""
-    session_id: str = Field(..., min_length=1)
-    word_id: int = Field(..., gt=0)
-    answer: str = Field(..., min_length=1, max_length=500)
-    time_taken_seconds: int = Field(..., ge=0)
-    hint_used: bool = Field(default=False)
+    """Request DTO for POST /game/:gameId/step/:stepId/answer"""
+    sutra: str = Field(..., min_length=1, description="Panini grammar rule number or alias")
 
 
 class SubmitAnswerResponse(BaseModel):
-    """Response DTO for answer submission"""
+    """Response DTO for POST /game/:gameId/step/:stepId/answer"""
     correct: bool
-    status: AnswerStatus
-    points_earned: int
-    correct_answer: str
     explanation: str
-    next_word: Optional[str] = None
-    next_word_id: Optional[int] = None
-    session_complete: bool = False
-    current_score: int
-    feedback: str
+    nextStepId: Optional[int] = Field(None, alias="next_step_id")
 
 
-class GetGameStateRequest(BaseModel):
-    """Request DTO for getting current game state"""
-    session_id: str = Field(..., min_length=1)
-
-
-class GetGameStateResponse(BaseModel):
-    """Response DTO for game state"""
-    session_id: str
-    status: GameStatus
-    difficulty: GameDifficulty
+class GameStatusResponse(BaseModel):
+    """Response DTO for GET /game/:gameId/status"""
+    currentStep: int = Field(alias="current_step")
+    totalSteps: int = Field(alias="total_steps")
     score: int
-    max_score: int
-    words_attempted: int
-    words_correct: int
-    current_word: Optional[str] = None
-    current_word_id: Optional[int] = None
-    time_elapsed_seconds: int
-    accuracy_percentage: float
+    startTime: str = Field(alias="start_time", description="ISO 8601 timestamp")
 
 
-class EndGameRequest(BaseModel):
-    """Request DTO for ending a game session"""
-    session_id: str = Field(..., min_length=1)
-
-
-class EndGameResponse(BaseModel):
-    """Response DTO for ending a game session"""
-    session_id: str
-    final_score: int
-    words_attempted: int
-    words_correct: int
-    accuracy_percentage: float
-    total_time_seconds: int
-    rank: Optional[int] = None
-    is_high_score: bool = False
-    summary: str
-
-
-class GameStatsResponse(BaseModel):
-    """Response DTO for game statistics"""
-    total_sessions: int
-    total_words_attempted: int
-    total_words_correct: int
-    average_accuracy: float
-    average_session_time_minutes: Optional[float] = None
-    best_score: int
-    favorite_difficulty: Optional[GameDifficulty] = None
-    total_play_time_minutes: int
-
-
-class LeaderboardRequest(BaseModel):
-    """Request DTO for leaderboard"""
-    difficulty: Optional[GameDifficulty] = None
-    limit: int = Field(default=10, ge=1, le=100)
-    page: int = Field(default=1, ge=1)
-
-
-class LeaderboardEntry(BaseModel):
-    """Individual leaderboard entry"""
-    rank: int
-    username: str
-    high_score: int
-    accuracy_percentage: float
-    sessions_played: int
-
-
-class LeaderboardResponse(BaseModel):
-    """Response DTO for leaderboard"""
-    entries: List[LeaderboardEntry]
-    total: int
-    page: int
-    limit: int
-    user_rank: Optional[int] = None
-
-
-class GameHistoryRequest(BaseModel):
-    """Request DTO for game history"""
-    user_id: Optional[str] = None
-    difficulty: Optional[GameDifficulty] = None
-    status: Optional[GameStatus] = None
-    limit: int = Field(default=20, ge=1, le=100)
-    page: int = Field(default=1, ge=1)
-
-
-class GameHistoryEntry(BaseModel):
-    """Individual game history entry"""
-    session_id: str
-    difficulty: GameDifficulty
-    status: GameStatus
+class FinishGameResponse(BaseModel):
+    """Response DTO for POST /game/:gameId/finish"""
     score: int
-    words_attempted: int
-    words_correct: int
-    accuracy_percentage: float
-    total_time_seconds: int
-    started_at: datetime
-    completed_at: Optional[datetime] = None
+    timeTaken: float = Field(alias="time_taken", description="Time taken in seconds")
+    correctAnswers: int = Field(alias="correct_answers")
+    mistakes: int
+    rank: str = Field(description="Achievement rank: Bronze, Silver, Gold, etc.")
 
 
-class GameHistoryResponse(BaseModel):
-    """Response DTO for game history"""
-    sessions: List[GameHistoryEntry]
-    total: int
-    page: int
-    limit: int
-    has_next: bool
-    has_prev: bool
+class RuleDetailsResponse(BaseModel):
+    """Response DTO for GET /rules/:sutra"""
+    sutra: str
+    description: str
+    example: str
+    category: str
+    next: List[str] = Field(description="Related rule numbers")
