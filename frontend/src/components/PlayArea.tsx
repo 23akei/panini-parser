@@ -1,18 +1,10 @@
 import React from 'react';
 import ScoreDisplay from './ScoreDisplay';
-import type { GameStep } from '../api/client';
+import type { PlayAreaProps } from '../types/interfaces';
 
-interface PlayAreaProps {
-  currentQuestion: string;
-  currentStep: GameStep | undefined;
-  score: number;
-  currentStepNumber: number;
-  totalSteps: number;
-}
-
-const PlayArea: React.FC<PlayAreaProps> = ({ 
-  currentQuestion, 
-  currentStep, 
+const PlayArea: React.FC<PlayAreaProps> = ({
+  currentQuestion,
+  currentStep,
   score,
   currentStepNumber,
   totalSteps
@@ -27,27 +19,21 @@ const PlayArea: React.FC<PlayAreaProps> = ({
           {currentQuestion && currentStep && (
             <div className="bg-white rounded-lg p-4 border">
               <div className="text-lg mb-2">
-                <strong>変換元:</strong> 
-                <span className="font-devanagari text-xl ml-2">{currentStep.from}</span>
+                <strong>Root:</strong> <span className="font-devanagari text-xl">{currentQuestion}</span>
               </div>
-              <div className="text-lg mb-2">
-                <strong>変換先:</strong>
-                <span className="font-devanagari text-xl ml-2">{currentStep.to}</span>
+              <div className="text-sm text-gray-600">
+                <strong>Desired Form:</strong> {currentQuestionData.case} {currentQuestionData.number}
               </div>
-              {currentStep.hint && (
-                <div className="text-sm text-blue-600 mt-2">
-                  <strong>ヒント:</strong> {currentStep.hint}
-                </div>
-              )}
+              <div className="text-sm text-gray-600 mt-2">
+                <strong>Expected Form:</strong>
+                <span className="font-devanagari text-lg ml-2">{currentQuestionData.expected}</span>
+              </div>
             </div>
           )}
 
           <div className="text-center py-8">
-            <div className="text-6xl mb-4">？</div>
-            <div className="text-2xl text-gray-600">パーニニ規則番号を入力</div>
-            <div className="text-sm text-gray-500 mt-2">
-              どの文法規則がこの変換を支配していますか？
-            </div>
+            <div className="text-6xl mb-4">1.4.24</div>
+            <div className="text-2xl text-gray-600">Panini Rule Number</div>
           </div>
         </div>
       </div>

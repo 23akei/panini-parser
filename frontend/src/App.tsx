@@ -1,4 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { MAXIMUM_HIT_POINTS } from './constants/appConstants';
+import HardGameScreen from './screens/HardGameScreen';
+import EasyGameScreen from './screens/EasyGameScreen';
+import HardGameMultiScreen from './screens/HardGameMultiScreen';
+import EasyGameMultiScreen from './screens/EasyGameMultiScreen';
+import HomeScreen from './screens/HomeScreen';
+import ModeSelectScreen from './screens/ModeSelectScreen';
+import GameClearScreen from './screens/GameClearScreen';
+import GameFailedScreen from './screens/GameFailedScreen';
+import type { Question } from './types/interfaces';
 import Timer from './components/Timer';
 import GameControls from './components/GameControls';
 import QuestionDisplay from './components/QuestionDisplay';
@@ -12,193 +22,440 @@ const SanskritGrammarGame = () => {
   // Game state
   const [gameState, setGameState] = useState<'stopped' | 'playing' | 'paused'>('stopped');
   const [timer, setTimer] = useState(61);
-  const [currentGameData, setCurrentGameData] = useState<StartGameResponse | null>(null);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [hitPoints, setHitPoints] = useState(MAXIMUM_HIT_POINTS);
   const [userRule, setUserRule] = useState('');
   const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'expert'>('beginner');
-  
+
   // API hooks
   const { startGame, submitAnswer, finishGame, isLoading, error } = useGameOperations();
-  const { 
-    data: gameStatus 
+  const {
+    data: gameStatus
   } = useGameStatus(
-    currentGameData?.game_id || null, 
+    currentGameData?.game_id || null,
     gameState === 'playing'
   );
 
   // Timer effect
+  const [playerScore, setPlayerScore] = useState(192);
+  const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
+  const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
+
+  // プレイヤー2のステート (対戦モード用)
+  const [gameState2, setGameState2] = useState<'stopped' | 'playing' | 'paused'>('stopped');
+  const [timer2, setTimer2] = useState(61);
+  const [hitPoints2, setHitPoints2] = useState(MAXIMUM_HIT_POINTS);
+  const [userRule2, setUserRule2] = useState('');
+  const [playerScore2, setPlayerScore2] = useState(192);
+
+  // 問題データを取得する関数
+  const getQuestions = (): Question[] => {
+    // 将来的には外部APIやサービスから取得する予定
+    return [
+      {
+        id: 1,
+        from: 'word1',
+        to: 'word2',
+        hint: 'hint_1_to_2'
+      },
+      {
+        id: 2,
+        from: 'word2',
+        to: 'word3',
+        hint: 'hint_2_to_3'
+      },
+      {
+        id: 3,
+        from: 'word3',
+        to: 'word4',
+        hint: 'hint_3_to_4'
+      },
+      {
+        id: 4,
+        from: 'word4',
+        to: 'word5',
+        hint: 'hint_4_to_5'
+      },
+      {
+        id: 5,
+        from: 'word5',
+        to: '',
+        hint: 'hint_5_to_end'
+      }
+    ];
+  };
+
+  const [currentQuestion, setCurrentQuestion] = useState('');
+  const [currentQuestion2, setCurrentQuestion2] = useState('');
+  const [currentQuestionData, setCurrentQuestionData] = useState<Question>();
+  const [currentQuestionData2, setCurrentQuestionData2] = useState<Question>();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionIndex2, setCurrentQuestionIndex2] = useState(0);
+
+  // ホーム画面に戻る関数
+  const returnToHome = () => {
+    setCurrentScreen('home');
+    resetGame();
+  };
+
+  // ゲームクリア処理
+  const handleGameWin = () => {
+    setGameState('stopped');
+    setCurrentScreen('gameClear');
+  };
+
+  // ゲーム失敗処理
+  const handleGameFail = () => {
+    setGameState('stopped');
+    setCurrentScreen('gameFailed');
+  };
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (gameState === 'playing' && timer > 0) {
       interval = setInterval(() => {
         setTimer(prev => prev - 1);
       }, 1000);
-    } else if (timer === 0) {
-      handleGameTimeout();
+    } else if (timer === 0 && gameState === 'playing') {
+      setGameState('stopped');
+      handleGameFail(); // 時間切れでゲーム失敗
     }
     return () => clearInterval(interval);
   }, [gameState, timer]);
 
-  // Game operations
-  const handleStartGame = async () => {
-    try {
-      const gameData = await startGame.mutateAsync({ 
-        level: difficulty, 
-        length: 5 
-      });
-      
-      setCurrentGameData(gameData);
-      setCurrentStepIndex(0);
-      setGameState('playing');
-      setTimer(61);
-      setUserRule('');
-    } catch (err) {
-      console.error('Failed to start game:', err);
+  // プレイヤー2用のタイマー処理
+  useEffect(() => {
+    if (gameMode === 'multi' && gameState2 === 'playing' && timer2 > 0) {
+      const interval = setInterval(() => {
+        setTimer2(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
     }
+  }, [gameState2, timer2, gameMode]);
+
+  const startGame = () => {
+    if (gameState === 'stopped') {
+      resetGame();
+    } else {
+      const questions = getQuestions();
+      const currentQ = questions[currentQuestionIndex];
+      setCurrentQuestionData(currentQ);
+      setCurrentQuestion(currentQ.from);
+    }
+    setGameState('playing');
+  };
+
+  // プレイヤー2用のゲーム開始
+  const startGame2 = () => {
+    if (gameState2 === 'stopped') {
+      resetGame2();
+    } else {
+      const questions = getQuestions();
+      const currentQ = questions[currentQuestionIndex2];
+      setCurrentQuestionData2(currentQ);
+      setCurrentQuestion2(currentQ.from);
+    }
+    setGameState2('playing');
+  };
+
+  const healHP = () => {
+    if (hitPoints < MAXIMUM_HIT_POINTS) {
+      setHitPoints(prev => prev + 1);
+    } else {
+      alert('HPは最大値です！');
+    }
+  };
+
+  // ダメージ処理の修正
+  const damageHP = () => {
+    if (hitPoints > 1) {
+      setHitPoints(prev => prev - 1);
+    } else {
+      setHitPoints(0);
+      handleGameFail(); // HPがなくなるとゲーム失敗
+    }
+  };
+
+  // プレイヤー2用のダメージ処理
+  const damageHP2 = () => {
+    if (hitPoints2 > 1) {
+      setHitPoints2(prev => prev - 1);
+    } else {
+      setHitPoints2(0);
+      setGameState2('stopped');
+      // プレイヤー2のゲーム失敗処理
+    }
+  };
+
+  const resetHP = () => {
+    setHitPoints(MAXIMUM_HIT_POINTS);
   };
 
   const handlePauseGame = () => {
     setGameState('paused');
   };
 
-  const handleResetGame = async () => {
-    if (currentGameData?.game_id) {
-      try {
-        await finishGame.mutateAsync(currentGameData.game_id);
-      } catch (err) {
-        console.error('Failed to finish game properly:', err);
-      }
-    }
-    
+    const pauseGame2 = () => {
+    setGameState2('paused');
+  };
+
+  const resetGame = () => {
     setGameState('stopped');
     setTimer(61);
     setCurrentGameData(null);
     setCurrentStepIndex(0);
     setUserRule('');
+    setCurrentQuestionIndex(0);
+    setHitPoints(MAXIMUM_HIT_POINTS);
+    const questions = getQuestions();
+    const initialQ = questions[0];
+    setCurrentQuestionData(initialQ);
   };
 
-  const handleGameTimeout = async () => {
-    if (currentGameData?.game_id) {
-      try {
-        const results = await finishGame.mutateAsync(currentGameData.game_id);
-        alert(`タイムアップ！最終スコア: ${results.score}`);
-      } catch (err) {
-        console.error('Failed to finish game:', err);
-      }
+  // プレイヤー2用のリセット
+  const resetGame2 = () => {
+    setGameState2('stopped');
+    setTimer2(61);
+    setCurrentQuestion2('');
+    setUserRule2('');
+    setCurrentQuestionIndex2(0);
+    setHitPoints2(MAXIMUM_HIT_POINTS);
+    const questions = getQuestions();
+    const initialQ = questions[0];
+    setCurrentQuestionData2(initialQ);
+  };
+
+  const handleRuleSubmit = () => {
+    console.log('Submitted rule:', userRule);
+    const questions = getQuestions();
+    const currentQ = questions[currentQuestionIndex];
+
+    if (userRule.trim() === currentQ.hint) {
+      setPlayerScore(prev => prev + 10);
+      alert('正解！');
+    } else {
+      damageHP();
+      alert(`不正解。正解は: ${currentQ.hint}`);
     }
-    setGameState('stopped');
+
+    if (currentQuestionIndex < questions.length - 1) {
+      const nextIndex = currentQuestionIndex + 1;
+      const nextQ = questions[nextIndex];
+      setCurrentQuestionIndex(nextIndex);
+      setCurrentQuestionData(nextQ);
+      setCurrentQuestion(nextQ.from);
+      setUserRule('');
+    } else {
+      handleGameWin(); // 全問題終了でゲームクリア
+    }
   };
 
-  const handleRuleSubmit = async () => {
-    if (!currentGameData || !userRule.trim()) return;
+  // プレイヤー2用のルール提出処理
+  const handleRuleSubmit2 = () => {
+    console.log('Player 2 submitted rule:', userRule2);
+    const questions = getQuestions();
+    const currentQ = questions[currentQuestionIndex2];
 
-    const currentStep = currentGameData.steps[currentStepIndex];
-    if (!currentStep) return;
+    if (userRule2.trim() === currentQ.hint) {
+      setPlayerScore2(prev => prev + 10);
+      alert('Player 2: Correct!');
+    } else {
+      damageHP2();
+      alert(`Player 2: Incorrect. The correct answer is: ${currentQ.hint}`);
+    }
 
-    try {
-      const response = await submitAnswer.mutateAsync({
-        gameId: currentGameData.game_id,
-        stepId: currentStep.id,
-        request: { sutra: userRule.trim() }
-      });
-
-      if (response.correct) {
-        alert('正解！ ' + response.explanation);
-      } else {
-        alert('不正解。' + response.explanation);
-      }
-
-      // Move to next step or finish game
-      if (response.next_step_id !== null && response.next_step_id !== undefined) {
-        setCurrentStepIndex(prev => prev + 1);
-        setUserRule('');
-      } else {
-        // Game completed
-        const results = await finishGame.mutateAsync(currentGameData.game_id);
-        alert(`ゲーム完了！最終スコア: ${results.score} (${results.rank})`);
-        setGameState('stopped');
-      }
-    } catch (err) {
-      console.error('Failed to submit answer:', err);
+    if (currentQuestionIndex2 < questions.length - 1) {
+      const nextIndex = currentQuestionIndex2 + 1;
+      const nextQ = questions[nextIndex];
+      setCurrentQuestionIndex2(nextIndex);
+      setCurrentQuestionData2(nextQ);
+      setCurrentQuestion2(nextQ.from);
+      setUserRule2('');
+    } else {
+      setGameState2('stopped');
+      // プレイヤー2のゲーム終了処理
     }
   };
 
   const changeDifficulty = () => {
-    const difficulties: ('beginner' | 'intermediate' | 'expert')[] = ['beginner', 'intermediate', 'expert'];
+    const difficulties: ('EASY' | 'HARD')[] = ['EASY', 'HARD'];
     const currentIndex = difficulties.indexOf(difficulty);
     const nextIndex = (currentIndex + 1) % difficulties.length;
     setDifficulty(difficulties[nextIndex]);
   };
 
-  // Current step data
-  const currentStep: GameStep | undefined = currentGameData?.steps[currentStepIndex];
-  const currentQuestion = currentStep?.from || '';
+  // プレイヤー2用の難易度変更
+  const changeDifficulty2 = () => {
+    // プレイヤー2の難易度は常にプレイヤー1と同じに設定
+    // 個別に変更したい場合は、ここで別の処理を実装
+  };
 
-  // Loading and error states
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>エラー:</strong> {error.message}
-          <button 
-            onClick={() => window.location.reload()} 
-            className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-          >
-            再読み込み
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleModeSelect = (mode: 'single' | 'multi') => {
+    setGameMode(mode);
+    setCurrentScreen('modeSelect');
+  };
+
+  const handleDifficultySelect = (selectedDifficulty: 'EASY' | 'HARD') => {
+    setDifficulty(selectedDifficulty);
+    setCurrentScreen('game');
+
+    if (gameMode === 'single') {
+      resetGame();
+      startGame();
+    } else {
+      // 対戦モードの場合は両方のプレイヤーをリセット
+      resetGame();
+      resetGame2();
+      startGame();
+      startGame2();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        
-        <div className="flex justify-between items-center mb-8 border-b pb-4">
-          <div className="flex items-center space-x-4">
-            <QuestionDisplay currentQuestion={currentQuestion} />
-            <GameControls
-              gameState={gameState}
-              onStart={handleStartGame}
-              onPause={handlePauseGame}
-              onReset={handleResetGame}
-            />
-          </div>
-          <Timer timer={timer} />
-        </div>
+    <>
+      {currentScreen === 'home' && (
+        <HomeScreen onSelectMode={handleModeSelect} />
+      )}
 
-        {isLoading && (
-          <div className="mb-4 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <span className="ml-2">読み込み中...</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <PlayArea
-            currentQuestion={currentQuestion}
-            currentStep={currentStep}
-            score={gameStatus?.score || 0}
-            currentStepNumber={gameStatus?.current_step || 1}
-            totalSteps={gameStatus?.total_steps || 5}
-          />
-
-          <RuleInputForm
-            userRule={userRule}
-            gameState={gameState}
-            onRuleChange={setUserRule}
-            onSubmit={handleRuleSubmit}
-            isSubmitting={submitAnswer.isPending}
-          />
-        </div>
-
-        <DifficultySelector
-          difficulty={difficulty}
-          onChangeDifficulty={changeDifficulty}
+      {currentScreen === 'modeSelect' && (
+        <ModeSelectScreen
+          gameMode={gameMode}
+          onSelectDifficulty={handleDifficultySelect}
         />
-      </div>
-    </div>
+      )}
+
+      {currentScreen === 'game' && gameMode === 'single' && (
+        difficulty === 'HARD' ? (
+          <HardGameScreen
+            gameState={gameState}
+            timer={timer}
+            hitPoints={hitPoints}
+            currentQuestion={currentQuestion}
+            userRule={userRule}
+            playerScore={playerScore}
+            difficulty={difficulty}
+            currentQuestionData={currentQuestionData}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            handleRuleSubmit={handleRuleSubmit}
+            setUserRule={setUserRule}
+            changeDifficulty={changeDifficulty}
+          />
+        ) : (
+          <EasyGameScreen
+            gameState={gameState}
+            timer={timer}
+            hitPoints={hitPoints}
+            currentQuestion={currentQuestion}
+            userRule={userRule}
+            playerScore={playerScore}
+            difficulty={difficulty}
+            currentQuestionData={currentQuestionData}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            handleRuleSubmit={handleRuleSubmit}
+            setUserRule={setUserRule}
+            changeDifficulty={changeDifficulty}
+          />
+        )
+      )}
+
+      {currentScreen === 'game' && gameMode === 'multi' && (
+        difficulty === 'HARD' ? (
+          <HardGameMultiScreen
+            player1={{
+              gameState,
+              timer,
+              hitPoints,
+              currentQuestion,
+              userRule,
+              playerScore,
+              difficulty,
+              currentQuestionData,
+              startGame,
+              pauseGame,
+              resetGame,
+              handleRuleSubmit,
+              setUserRule,
+              changeDifficulty,
+              playerName: "Player 1"
+            }}
+            player2={{
+              gameState: gameState2,
+              timer: timer2,
+              hitPoints: hitPoints2,
+              currentQuestion: currentQuestion2,
+              userRule: userRule2,
+              playerScore: playerScore2,
+              difficulty,
+              currentQuestionData: currentQuestionData2,
+              startGame: startGame2,
+              pauseGame: pauseGame2,
+              resetGame: resetGame2,
+              handleRuleSubmit: handleRuleSubmit2,
+              setUserRule: setUserRule2,
+              changeDifficulty: changeDifficulty2
+            }}
+          />
+        ) : (
+          <EasyGameMultiScreen
+            player1={{
+              gameState,
+              timer,
+              hitPoints,
+              currentQuestion,
+              userRule,
+              playerScore,
+              difficulty,
+              currentQuestionData,
+              startGame,
+              pauseGame,
+              resetGame,
+              handleRuleSubmit,
+              setUserRule,
+              changeDifficulty,
+              playerName: "Player 1"
+            }}
+            player2={{
+              gameState: gameState2,
+              timer: timer2,
+              hitPoints: hitPoints2,
+              currentQuestion: currentQuestion2,
+              userRule: userRule2,
+              playerScore: playerScore2,
+              difficulty,
+              currentQuestionData: currentQuestionData2,
+              startGame: startGame2,
+              pauseGame: pauseGame2,
+              resetGame: resetGame2,
+              handleRuleSubmit: handleRuleSubmit2,
+              setUserRule: setUserRule2,
+              changeDifficulty: changeDifficulty2
+            }}
+          />
+        )
+      )}
+
+      {currentScreen === 'gameClear' && (
+        <GameClearScreen
+          playerScore={playerScore}
+          onReturnHome={returnToHome}
+        />
+      )}
+
+      {currentScreen === 'gameFailed' && (
+        <GameFailedScreen
+          playerScore={playerScore}
+          onReturnHome={returnToHome}
+        />
+      )}
+
+      {currentScreen === 'results' && (
+        <div>Results not implemented!</div>
+      )}
+    </>
   );
 };
 

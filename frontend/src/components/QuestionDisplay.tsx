@@ -9,7 +9,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({ currentQuestion }) =>
     <div className="bg-red-100 border-2 border-red-500 rounded-lg px-4 py-2">
       <span className="text-red-700 font-semibold">Question</span>
       <div className="text-lg font-bold mt-1">
-        {currentQuestion || '問題を開始してください'}
+        {currentQuestion || 'Please start the game'}
       </div>
     </div>
   );

@@ -9,10 +9,10 @@ interface RuleInputFormProps {
   isSubmitting?: boolean;
 }
 
-const RuleInputForm: React.FC<RuleInputFormProps> = ({ 
-  userRule, 
-  gameState, 
-  onRuleChange, 
+const RuleInputForm: React.FC<RuleInputFormProps> = ({
+  userRule,
+  gameState,
+  onRuleChange,
   onSubmit,
   isSubmitting = false
 }) => {
@@ -23,7 +23,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              パーニニ規則を入力してください:
+              Enter Panini Rule:
             </label>
             <input
               type="text"
