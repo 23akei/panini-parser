@@ -1,0 +1,8 @@
+.venv
+CLAUDE.md
+.claude
+.vscode
+.idea
+node_modules
+__pycache__
+*.egg-info
