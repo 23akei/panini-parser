@@ -1,17 +1,16 @@
 import React from 'react';
 import HintsPanel from './HintsPanel';
+import type { Question } from '../types/interfaces';
 
 interface RuleInputFormProps {
-  userRule: string;
   gameState: 'stopped' | 'playing' | 'paused';
   onRuleChange: (rule: string) => void;
-  onSubmit: () => void;
+  onSubmit: (questions: Question[]) => void;
 }
 
 const RuleInputForm: React.FC<RuleInputFormProps> = ({ 
-  userRule, 
   gameState, 
-  onRuleChange, 
+  onRuleChange,
   onSubmit 
 }) => {
   return (
@@ -24,7 +23,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
               Enter Panini Rule:
             </label>
             <textarea
-              value={userRule}
+              value=""
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="Example: अकारान्त पुल्लिङ्ग प्रथमा एकवचन"
@@ -33,7 +32,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
           </div>
           <button
             onClick={onSubmit}
-            disabled={gameState !== 'playing' || !userRule.trim()}
+            disabled={gameState !== 'playing'}
             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors"
           >
             Submit Rule

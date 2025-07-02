@@ -7,73 +7,67 @@ import RuleInputForm from '../components/RuleInputForm';
 import DifficultySelector from '../components/DifficultySelector';
 import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
+import type { Question } from '../types/interfaces';
 
 interface HardGameMultiScreenProps {
+  gameState: 'stopped' | 'playing' | 'paused';
+  timer: number;
+  questions: Question[];
+  currentQuestionDataIndex: number;
+  difficulty: 'EASY' | 'HARD';
+  startGame: () => void;
+  pauseGame: () => void;
+  resetGame: () => void;
   player1: PlayerProps;
   player2: PlayerProps;
 }
 
-const PlayerSection: React.FC<PlayerProps & { playerName: string }> = ({
+const PlayerSection: React.FC<PlayerProps> = ({
   gameState,
-  timer,
   hitPoints,
-  currentQuestion,
-  userRule,
   playerScore,
-  difficulty,
-  currentQuestionData,
-  startGame,
-  pauseGame,
-  resetGame,
+  questions,
+  currentQuestionDataIndex,
+  setUserInput,
   handleRuleSubmit,
-  setUserRule,
-  changeDifficulty,
   playerName
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
       <h2 className="text-xl font-bold mb-4 text-center">{playerName}</h2>
-      
+      <pre>{handleRuleSubmit.toString()}</pre>
       <div className="flex justify-between items-center mb-4 border-b pb-3">
-        <div className="flex items-center space-x-2">
-          <QuestionDisplay currentQuestion={currentQuestionData.from} />
-          <GameControls
-            gameState={gameState}
-            onStart={startGame}
-            onPause={pauseGame}
-            onReset={resetGame}
-          />
-        </div>
         <div className="flex items-center space-x-4">
-          <Timer timer={timer} />
           <HPDisplay hitPoints={hitPoints} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 mb-4">
-        <PlayArea
+        {/* <PlayArea
           currentQuestion={currentQuestion}
           currentQuestionData={currentQuestionData}
           playerScore={playerScore}
-        />
+        /> */}
 
         <RuleInputForm
-          userRule={userRule}
           gameState={gameState}
-          onRuleChange={setUserRule}
-          onSubmit={handleRuleSubmit}
+          onRuleChange={setUserInput}
+          onSubmit={(questions: Question[]) => handleRuleSubmit(questions)}
         />
       </div>
-
-      <DifficultySelector
-        difficulty={difficulty}
-        onChangeDifficulty={changeDifficulty}
-      />
     </div>
   );
 };
 
 const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
+  gameState,
+  timer,
+  questions,
+  currentQuestionDataIndex,
+  difficulty,
+  startGame,
+  pauseGame,
+  resetGame,
   player1,
   player2
 }) => {
@@ -82,7 +76,14 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       <h1 className="text-2xl font-bold text-center mb-6">
         Sanskrit Grammar Game - Two Player Mode (Hard)
       </h1>
-      
+        <QuestionDisplay currentQuestion={questions[currentQuestionDataIndex]} />
+        <GameControls
+          gameState={gameState}
+          onStart={startGame}
+          onPause={pauseGame}
+          onReset={resetGame}
+        />
+        <Timer timer={timer} />
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
           <PlayerSection {...player1} playerName="Player 1" />
