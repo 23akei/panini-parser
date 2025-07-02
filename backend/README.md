@@ -68,32 +68,26 @@ backend/
    - Request/response validation
    - Data transformation
 
-## API Endpoints
+## API Documentation
 
-### Health & Info
-- `GET /` - Root endpoint with API info
-- `GET /api/v1/health` - Health check
+The backend provides a comprehensive RESTful API for the Panini Parser Sanskrit game. 
 
-### Word Endpoints
-- `POST /api/v1/words/parse` - Parse a Sanskrit word
-- `GET /api/v1/words/{word_id}` - Get word details
-- `GET /api/v1/words/` - List words with filtering
-- `GET /api/v1/words/random/word` - Get random word for gameplay
-- `POST /api/v1/words/` - Create new word
-- `PUT /api/v1/words/{word_id}` - Update word
-- `DELETE /api/v1/words/{word_id}` - Delete word
+### Interactive Documentation
 
-### Game Endpoints
-- `POST /api/v1/game/start` - Start new game session
-- `POST /api/v1/game/answer` - Submit answer
-- `GET /api/v1/game/state/{session_id}` - Get game state
-- `POST /api/v1/game/end/{session_id}` - End game session
-- `GET /api/v1/game/leaderboard` - Get leaderboard
-- `GET /api/v1/game/stats` - Get game statistics
+Once the server is running, comprehensive API documentation with interactive testing is available at:
 
-### Legacy Endpoints (Backward Compatibility)
-- `POST /api/v1/parse` - Parse a Sanskrit word (legacy)
-- `GET /api/v1/game/start` - Start game session (legacy)
+- **Swagger UI**: http://localhost:8000/docs - Interactive API explorer with request/response examples
+- **ReDoc**: http://localhost:8000/redoc - Clean, readable API reference documentation
+- **OpenAPI Schema**: http://localhost:8000/openapi.json - Machine-readable API specification
+
+### Endpoint Overview
+
+The API provides endpoints for:
+
+- **Game Management** (`/game/*`): Start games, submit answers, track progress, and finish sessions
+- **Grammar Rules** (`/rules/*`): Lookup detailed information about Panini grammar rules
+
+All endpoints return JSON responses and follow standard HTTP status codes with detailed error messages.
 
 ## Development
 
@@ -137,7 +131,7 @@ CORS is configured to allow requests from:
 
 1. Define DTOs in `dto/` directory with proper Pydantic validation
 2. Implement business logic in appropriate service (`services/`)
-3. Create controller endpoint in `controllers/` 
+3. Create controller endpoint in `controllers/`
 4. Include router in `main.py` if new controller created
 5. Regenerate frontend TypeScript client: `cd frontend && pnpm run generate-api`
 
@@ -146,7 +140,7 @@ CORS is configured to allow requests from:
 The backend automatically generates OpenAPI documentation that can be used to create type-safe clients:
 
 - **Interactive docs**: http://localhost:8000/docs (Swagger UI)
-- **ReDoc**: http://localhost:8000/redoc  
+- **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
 
 The frontend uses this schema to auto-generate TypeScript clients with full type safety.
