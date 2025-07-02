@@ -72,7 +72,11 @@ class GameService(IGameService):
         if step_id < 1 or step_id > len(session.history):
             raise ValueError("Invalid step ID")
         if session.current_step != step_id:
-            raise ValueError("Not the current step")
+            return SubmitAnswerResponse(
+                correct=False,
+                explanation="You can only submit an answer for the current step.",
+                next_step_id=session.current_step
+            )
         is_correct = session.history[step_id-1].code == request.sutra
         next_step_id = step_id + 1 if is_correct and step_id < len(session.history) else step_id
         self.sessions[game_id].current_step = next_step_id
