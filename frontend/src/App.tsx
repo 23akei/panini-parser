@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiClient } from './api/api-client'
+// import { apiClient } from './api/api-client'
 import './App.css'
 
 interface GameSession {
@@ -37,7 +37,7 @@ function App() {
 
   const parseWord = async () => {
     if (!userInput.trim()) return
-    
+
     try {
       setIsLoading(true)
       const result = await apiClient.parseWord(userInput)
@@ -68,7 +68,7 @@ function App() {
               <h3>Parse this word:</h3>
               <div className="sanskrit-word">{gameSession.current_word}</div>
             </div>
-            
+
             <div className="input-section">
               <input
                 type="text"
