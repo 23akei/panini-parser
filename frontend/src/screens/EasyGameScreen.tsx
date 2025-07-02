@@ -44,10 +44,9 @@ const EasyGameScreen: React.FC<GameScreenProps> = ({
       </div>
       {gameState === 'playing' && currentQuestionData && (
         <div style={{ marginTop: '20px' }}>
-          <h2>Question: {currentQuestionData.word}</h2>
-          <p>Case: {currentQuestionData.case}</p>
-          <p>Number: {currentQuestionData.number}</p>
-          <p>Expected Form: {currentQuestionData.expected}</p>
+          <h2>From: {currentQuestionData.from}</h2>
+          <p>To: {currentQuestionData.to}</p>
+          <p>Hint: {currentQuestionData.hint || 'No hint available'}</p>
           <input
             type="text"
             value={userRule}

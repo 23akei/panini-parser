@@ -11,6 +11,14 @@ import ModeSelectScreen from './screens/ModeSelectScreen';
 import GameClearScreen from './screens/GameClearScreen';
 import GameFailedScreen from './screens/GameFailedScreen';
 import type { Question } from './types/interfaces';
+import Timer from './components/Timer';
+import GameControls from './components/GameControls';
+import QuestionDisplay from './components/QuestionDisplay';
+import PlayArea from './components/PlayArea';
+import RuleInputForm from './components/RuleInputForm';
+import DifficultySelector from './components/DifficultySelector';
+import { useGameOperations, useGameStatus } from './hooks/useGame';
+import type { StartGameResponse, GameStep } from './api/client';
 
 const SanskritGrammarGame = () => {
   /**
@@ -18,6 +26,23 @@ const SanskritGrammarGame = () => {
    */
   // 共通ステート
   const [gameState, setGameState] = useState<'stopped' | 'playing' | 'paused'>('stopped');
+  const [userRule, setUserRule] = useState('');
+
+  // API hooks
+  const { startGame: startGameMutation, submitAnswer, finishGame, isLoading, error } = useGameOperations();
+  
+  // API state
+  const [currentGameData, setCurrentGameData] = useState<StartGameResponse | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  
+  const {
+    data: gameStatus
+  } = useGameStatus(
+    currentGameData?.game_id || null,
+    gameState === 'playing'
+  );
+
+  // Timer effect
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
   const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
@@ -55,6 +80,19 @@ const SanskritGrammarGame = () => {
   /**
    * 関数定義
    */
+  // Map UI difficulty to API difficulty
+  const mapDifficultyToApiLevel = (difficulty: 'EASY' | 'HARD'): string => {
+    return difficulty === 'EASY' ? 'beginner' : 'expert';
+  };
+
+  const pauseGame = () => {
+    if (gameState === 'playing') {
+      setGameState('paused');
+    } else if (gameState === 'paused') {
+      setGameState('playing');
+    }
+  };
+  
   // 問題データを取得する関数
   const getQuestions = (): Question[] => {
     // 将来的には外部APIやサービスから取得する予定
@@ -155,7 +193,7 @@ const SanskritGrammarGame = () => {
     setHitPoints(MAXIMUM_HIT_POINTS);
   };
 
-  const pauseGame = () => {
+  const handlePauseGame = () => {
     setGameState('paused');
   };
 
@@ -237,14 +275,14 @@ const SanskritGrammarGame = () => {
       {currentScreen === 'home' && (
         <HomeScreen onSelectMode={handleModeSelect} />
       )}
-      
+
       {currentScreen === 'modeSelect' && (
-        <ModeSelectScreen 
-          gameMode={gameMode} 
-          onSelectDifficulty={handleDifficultySelect} 
+        <ModeSelectScreen
+          gameMode={gameMode}
+          onSelectDifficulty={handleDifficultySelect}
         />
       )}
-      
+
       {currentScreen === 'game' && gameMode === 'single' && (
         difficulty === 'HARD' ? (
           <p>Not implemented!!!</p>
@@ -252,7 +290,7 @@ const SanskritGrammarGame = () => {
           <p>Not implemented!!!</p>
         )
       )}
-      
+
       {currentScreen === 'game' && gameMode === 'multi' && (
         difficulty === 'HARD' ? (
           <HardGameMultiScreen 
@@ -289,21 +327,21 @@ const SanskritGrammarGame = () => {
            <p>Not implemented!!!</p>
         )
       )}
-      
+
       {currentScreen === 'gameClear' && (
-        <GameClearScreen 
+        <GameClearScreen
           playerScore={playerScore}
           onReturnHome={returnToHome}
         />
       )}
-      
+
       {currentScreen === 'gameFailed' && (
         <GameFailedScreen
           playerScore={playerScore}
           onReturnHome={returnToHome}
         />
       )}
-      
+
       {currentScreen === 'results' && (
         <div>Results not implemented!</div>
       )}
