@@ -27,7 +27,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="例: 3.1.68 または規則名"
-              disabled={gameState !== 'playing' || isSubmitting}
+              disabled={gameState !== 'playing'}
             />
           </div>
           <button
@@ -35,14 +35,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
             disabled={gameState !== 'playing'}
             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors"
           >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                送信中...
-              </>
-            ) : (
-              'Submit Rule'
-            )}
+
           </button>
         </div>
       </div>

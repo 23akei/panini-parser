@@ -65,7 +65,7 @@ const SanskritGrammarGame = () => {
    * 時間のカウントダウン処理
    */
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout;
     if (gameState === 'playing' && timer > 0) {
       interval = setInterval(() => {
         setTimer(prev => prev - 1);
@@ -99,32 +99,32 @@ const SanskritGrammarGame = () => {
     return [
       {
         id: 1,
-        from: 'word1',
-        to: 'word2',
+        from_word: 'word1',
+        to_word: 'word2',
         hint: 'hint_1_to_2'
       },
       {
         id: 2,
-        from: 'word2',
-        to: 'word3',
+        from_word: 'word2',
+        to_word: 'word3',
         hint: 'hint_2_to_3'
       },
       {
         id: 3,
-        from: 'word3',
-        to: 'word4',
+        from_word: 'word3',
+        to_word: 'word4',
         hint: 'hint_3_to_4'
       },
       {
         id: 4,
-        from: 'word4',
-        to: 'word5',
+        from_word: 'word4',
+        to_word: 'word5',
         hint: 'hint_4_to_5'
       },
       {
         id: 5,
-        from: 'word5',
-        to: '',
+        from_word: 'word5',
+        to_word: '',
         hint: 'hint_5_to_end'
       }
     ];
