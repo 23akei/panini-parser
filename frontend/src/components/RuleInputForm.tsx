@@ -1,20 +1,17 @@
 import React from 'react';
 import HintsPanel from './HintsPanel';
+import type { Question } from '../types/interfaces';
 
 interface RuleInputFormProps {
-  userRule: string;
   gameState: 'stopped' | 'playing' | 'paused';
   onRuleChange: (rule: string) => void;
-  onSubmit: () => void;
-  isSubmitting?: boolean;
+  onSubmit: (questions: Question[]) => void;
 }
 
-const RuleInputForm: React.FC<RuleInputFormProps> = ({
-  userRule,
-  gameState,
+const RuleInputForm: React.FC<RuleInputFormProps> = ({ 
+  gameState, 
   onRuleChange,
-  onSubmit,
-  isSubmitting = false
+  onSubmit 
 }) => {
   return (
     <div className="space-y-6">
@@ -25,28 +22,20 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Enter Panini Rule:
             </label>
-            <input
-              type="text"
-              value={userRule}
+            <textarea
+              value={undefined} // これにより、コンポーネントは非制御モードで動作します
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="例: 3.1.68 または規則名"
-              disabled={gameState !== 'playing' || isSubmitting}
+              disabled={gameState !== 'playing'}
             />
           </div>
           <button
-            onClick={onSubmit}
-            disabled={gameState !== 'playing' || !userRule.trim() || isSubmitting}
-            className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
+            onClick={() => onSubmit([])} /* 空配列は後でPlayerSectionで置き換えられます */
+            disabled={gameState !== 'playing'}
+            className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors"
           >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                送信中...
-              </>
-            ) : (
-              'Submit Rule'
-            )}
+
           </button>
         </div>
       </div>
