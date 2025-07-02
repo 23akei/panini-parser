@@ -8,7 +8,7 @@ from typing import Optional
 
 from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
-    GameStatusResponse, FinishGameResponse, RuleDetailsResponse
+    GameStatusResponse, FinishGameResponse, RuleDetailsResponse, GetChoicesResponse
 )
 
 
@@ -114,6 +114,26 @@ class IGameService(ABC):
             
         Raises:
             ValueError: If rule not found in the grammar database
+        """
+        pass
+
+    @abstractmethod
+    async def get_choices(self, game_id: str, step_id: int) -> GetChoicesResponse:
+        """
+        Get multiple choice options for a specific game step.
+        
+        Provides 4 Panini sutra options for the player to choose from,
+        including the correct answer and 3 distractors.
+        
+        Args:
+            game_id: Unique game session identifier
+            step_id: Step number within the game sequence
+            
+        Returns:
+            4 multiple choice options with sutra codes and descriptions
+            
+        Raises:
+            ValueError: If game session or step not found
         """
         pass
 

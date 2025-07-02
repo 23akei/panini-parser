@@ -5,13 +5,15 @@ Service layer for game-related business logic
 import uuid
 from datetime import datetime
 from typing import Optional, Dict
+import random
 
 from .interfaces import IGameService
 from .word_service import WordService
 from ..models.game import GameSession
 from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
-    GameStatusResponse, FinishGameResponse, RuleDetailsResponse, GameStep
+    GameStatusResponse, FinishGameResponse, RuleDetailsResponse, GameStep, 
+    GetChoicesResponse, SutraChoice
 )
 from vidyut.kosha import Kosha
 
@@ -22,10 +24,13 @@ class GameService(IGameService):
     def __init__(
         self,
         kosha: Kosha,
+        sutras: Optional[list[str]] = None,
         sessions: Optional[Dict[str, GameSession]] = None,
     ):
         self.sessions = sessions if sessions is not None else {}
         self._word_service = WordService(kosha)
+        self.sutras = sutras if sutras is not None else []
+        self.sutra_codes = list(set([sutra.code for sutra in sutras])) if sutras is not None else []
 
     async def start_game(self, request: StartGameRequest) -> StartGameResponse:
         """Start a new game session"""
@@ -167,6 +172,54 @@ class GameService(IGameService):
             category=rule_data["category"],
             next=rule_data["next"]
         )
+    async def get_choices(self, game_id: str, step_id: int) -> GetChoicesResponse:
+        """Get multiple choice options for a specific game step"""
+        # Validate game exists
+        session = self.sessions.get(game_id, None)
+        if not session:
+            raise ValueError("Game session not found")
+        if step_id < 1 or step_id > len(session.history):
+            raise ValueError("Invalid step ID")
+        
+        # Get the correct answer
+        correct_code = session.history[step_id-1].code
+        correct_sutras = [sutra for sutra in self.sutras if sutra.code == correct_code]
+        print(f"Correct code: {correct_code}, Sutras: {correct_sutras}")
+        if not correct_sutras:
+            raise ValueError(f"No sutra found for code {correct_code}")
+        correct_sutra  = correct_sutras[0]  # Use the first match if multiple found
+        
+        # Get 3 random wrong choices
+        print(f"Correct sutra: {correct_sutra}")
+        wrong_choices = random.sample([sutra for sutra in self.sutras if sutra.code != correct_code], 3)
+        
+        # Combine and shuffle choices
+        all_choices = [correct_sutra] + wrong_choices
+        print(f"Correct choice: {correct_sutra}, Wrong choices: {wrong_choices}")
+        random.shuffle(all_choices)
+        
+        # Create choice objects with descriptions
+        choices = []
+        for sutra in all_choices:
+            # Simple description (you can enhance this with actual rule descriptions)
+            print(sutra)
+            choices.append(SutraChoice(sutra=sutra.code, description=sutra.text))
+        
+        return GetChoicesResponse(choices=choices)
+
+    async def get_sutra_candidate(self, game_id: str, step_id: int) -> str:
+        """Get a random sutra candidate for the current step"""
+        # Validate game exists
+        session = self.sessions.get(game_id, None)
+        if not session:
+            raise ValueError("Game session not found")
+        if step_id < 1 or step_id > len(session.history):
+            raise ValueError("Invalid step ID")
+        codes = [session.history[step_id-1].code]
+        codes.append(random.sample(self.sutra_codes,3))
+        
+        # Return a random sutra from the available sutras
+        return codes
 
     def _get_difficulty_level(self, difficulty: str) -> int:
         """Convert difficulty string to numeric level"""

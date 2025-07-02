@@ -63,3 +63,14 @@ class RuleDetailsResponse(BaseModel):
     example: str
     category: str
     next: List[str] = Field(description="Related rule numbers")
+
+
+class SutraChoice(BaseModel):
+    """Individual sutra choice option"""
+    sutra: str = Field(description="Panini rule number")
+    description: str = Field(description="Rule description")
+
+
+class GetChoicesResponse(BaseModel):
+    """Response DTO for GET /game/:gameId/step/:stepId/choices"""
+    choices: List[SutraChoice] = Field(description="4 multiple choice options")
