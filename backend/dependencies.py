@@ -12,6 +12,7 @@ from .repositories.interfaces import (
     IWordRepository, IGameRepository, 
     ILeaderboardRepository, IStatsRepository
 )
+from .services.interfaces import IGameService, IWordService
 from .services.word_service import WordService
 from .services.game_service import GameService
 
@@ -48,7 +49,7 @@ def get_word_service() -> WordService:
     return WordService(word_repository)
 
 
-def get_game_service() -> GameService:
+def get_game_service() -> IGameService:
     """Get game service instance"""
     game_repository = get_game_repository()
     word_repository = get_word_repository()

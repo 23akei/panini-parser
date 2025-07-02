@@ -9,8 +9,11 @@ from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
     GameStatusResponse, FinishGameResponse, RuleDetailsResponse
 )
-from ..services.game_service import GameService
+from ..services.interfaces import IGameService
 from ..dependencies import get_game_service
+
+# Create combined router for backward compatibility
+router = APIRouter()
 
 game_router = APIRouter(
     prefix="/game", 
@@ -34,7 +37,7 @@ rules_router = APIRouter(
 async def start_game(
     level: str = "beginner",
     length: int = 5,
-    game_service: GameService = Depends(get_game_service)
+    game_service: IGameService = Depends(get_game_service)
 ) -> StartGameResponse:
     """
     Start a new Sanskrit parsing game session.
@@ -98,7 +101,7 @@ async def submit_answer(
     game_id: str,
     step_id: int,
     request: SubmitAnswerRequest,
-    game_service: GameService = Depends(get_game_service)
+    game_service: IGameService = Depends(get_game_service)
 ) -> SubmitAnswerResponse:
     """
     Submit a Panini grammar rule as an answer for a specific transformation step.
@@ -139,7 +142,7 @@ async def submit_answer(
         req = SubmitAnswerRequest(
             sutra=request.sutra.strip()
         )
-        return await game_service.submit_answer(req)
+        return await game_service.submit_answer(game_id, step_id, req)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -160,7 +163,7 @@ async def submit_answer(
 )
 async def get_game_status(
     game_id: str,
-    game_service: GameService = Depends(get_game_service)
+    game_service: IGameService = Depends(get_game_service)
 ) -> GameStatusResponse:
     """
     Get the current status and progress of an active game session.
@@ -193,7 +196,7 @@ async def get_game_status(
     ```
     """
     try:
-        return await game_service.get_game_state(game_id)
+        return await game_service.get_game_status(game_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -214,7 +217,7 @@ async def get_game_status(
 )
 async def finish_game(
     game_id: str,
-    game_service: GameService = Depends(get_game_service)
+    game_service: IGameService = Depends(get_game_service)
 ) -> FinishGameResponse:
     """
     Complete a game session and receive comprehensive final results.
@@ -255,7 +258,7 @@ async def finish_game(
     ```
     """
     try:
-        return await game_service.end_game(game_id)
+        return await game_service.finish_game(game_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -276,7 +279,7 @@ async def finish_game(
 )
 async def get_rule_details(
     sutra: str,
-    game_service: GameService = Depends(get_game_service)
+    game_service: IGameService = Depends(get_game_service)
 ) -> RuleDetailsResponse:
     """
     Get detailed information about a specific Panini grammar rule (sutra).
@@ -318,13 +321,7 @@ async def get_rule_details(
     ```
     """
     try:
-        return RuleDetailsResponse(
-            sutra="",
-            description="",
-            example="",
-            category="",
-            next=[]
-        )
+        return await game_service.get_rule_details(sutra)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -335,3 +332,8 @@ async def get_rule_details(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error getting rule details: {str(e)}"
         )
+
+
+# Include sub-routers in main router
+router.include_router(game_router)
+router.include_router(rules_router)
