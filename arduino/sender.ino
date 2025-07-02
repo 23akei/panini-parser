@@ -13,7 +13,7 @@
 */
 
 int FirstShotX , FirstShotY;
-const unsigned int BAUD_RATE = 9600;//设置波特率
+const unsigned int BAUD_RATE = 9600;
 void setup()
 {
   for(int i=0; i<19; i++)
