@@ -11,6 +11,9 @@
     "download-schema": "curl http://localhost:8000/openapi.json -o openapi.json",
     "generate-api": "docker run --rm -v \"${PWD}:/local\" openapitools/openapi-generator-cli:latest generate -i /local/openapi.json -g typescript-axios -o /local/src/api/generated --additional-properties=supportsES6=true,npmName=panini-api,withInterfaces=true,typescriptThreePlus=true",
     "generate-api:direct": "openapi-generator-cli generate -i http://localhost:8000/openapi.json -g typescript-axios -o src/api/generated --additional-properties=supportsES6=true,npmName=panini-api,withInterfaces=true,typescriptThreePlus=true",
+    "generate-openapi": "pnpm run export-openapi && pnpm run generate-api",
+    "export-openapi": "./scripts/export-openapi.sh",
+    "export-and-generate": "REGENERATE=true ./scripts/export-openapi.sh",
     "api:download-and-generate": "npm run download-schema && npm run generate-api"
   },
   "dependencies": {
