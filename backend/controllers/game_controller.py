@@ -119,19 +119,19 @@ async def get_leaderboard(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Limit cannot exceed 100"
         )
-    
+
     if page < 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Page must be >= 1"
         )
-    
+
     request = LeaderboardRequest(
         difficulty=difficulty,
         limit=limit,
         page=page
     )
-    
+
     try:
         return await game_service.get_leaderboard(request)
     except Exception as e:
