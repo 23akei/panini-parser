@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MAXIMUM_HIT_POINTS } from './constants/appConstants';
 import HardGameScreen from './screens/HardGameScreen';
 import EasyGameScreen from './screens/EasyGameScreen';
+import HardGameMultiScreen from './screens/HardGameMultiScreen';
+import EasyGameMultiScreen from './screens/EasyGameMultiScreen';
 import HomeScreen from './screens/HomeScreen';
 import ModeSelectScreen from './screens/ModeSelectScreen';
 import GameClearScreen from './screens/GameClearScreen';
@@ -24,7 +26,17 @@ const SanskritGrammarGame = () => {
   const [playerScore, setPlayerScore] = useState(192);
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
   const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
-  const [gameMode, setGameMode] = useState<'single'>('single');
+  const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  // プレイヤー2のステート (対戦モード用)
+  const [gameState2, setGameState2] = useState<'stopped' | 'playing' | 'paused'>('stopped');
+  const [timer2, setTimer2] = useState(61);
+  const [hitPoints2, setHitPoints2] = useState(MAXIMUM_HIT_POINTS);
+  const [currentQuestion2, setCurrentQuestion2] = useState('');
+  const [userRule2, setUserRule2] = useState('');
+  const [playerScore2, setPlayerScore2] = useState(192);
+  const [currentQuestionIndex2, setCurrentQuestionIndex2] = useState(0);
 
   const questions: Question[] = [
     {
@@ -43,7 +55,8 @@ const SanskritGrammarGame = () => {
     }
   ];
 
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionData, setCurrentQuestionData] = useState<Question>(questions[0]);
+  const [currentQuestionData2, setCurrentQuestionData2] = useState<Question>(questions[0]);
 
   // ホーム画面に戻る関数
   const returnToHome = () => {
@@ -76,6 +89,16 @@ const SanskritGrammarGame = () => {
     return () => clearInterval(interval);
   }, [gameState, timer]);
 
+  // プレイヤー2用のタイマー処理
+  useEffect(() => {
+    if (gameMode === 'multi' && gameState2 === 'playing' && timer2 > 0) {
+      const interval = setInterval(() => {
+        setTimer2(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [gameState2, timer2, gameMode]);
+
   const startGame = () => {
     if (gameState === 'stopped') {
       resetGame();
@@ -83,6 +106,16 @@ const SanskritGrammarGame = () => {
       setCurrentQuestion(questions[currentQuestionIndex].word);
     }
     setGameState('playing');
+  };
+
+  // プレイヤー2用のゲーム開始
+  const startGame2 = () => {
+    if (gameState2 === 'stopped') {
+      resetGame2();
+    } else {
+      setCurrentQuestion2(questions[currentQuestionIndex2].word);
+    }
+    setGameState2('playing');
   };
 
   const healHP = () => {
@@ -103,12 +136,27 @@ const SanskritGrammarGame = () => {
     }
   };
 
+  // プレイヤー2用のダメージ処理
+  const damageHP2 = () => {
+    if (hitPoints2 > 1) {
+      setHitPoints2(prev => prev - 1);
+    } else {
+      setHitPoints2(0);
+      setGameState2('stopped');
+      // プレイヤー2のゲーム失敗処理
+    }
+  };
+
   const resetHP = () => {
     setHitPoints(MAXIMUM_HIT_POINTS);
   };
 
   const pauseGame = () => {
     setGameState('paused');
+  };
+
+    const pauseGame2 = () => {
+    setGameState2('paused');
   };
 
   const resetGame = () => {
@@ -118,6 +166,16 @@ const SanskritGrammarGame = () => {
     setUserRule('');
     setCurrentQuestionIndex(0);
     setHitPoints(MAXIMUM_HIT_POINTS);
+  };
+
+  // プレイヤー2用のリセット
+  const resetGame2 = () => {
+    setGameState2('stopped');
+    setTimer2(61);
+    setCurrentQuestion2('');
+    setUserRule2('');
+    setCurrentQuestionIndex2(0);
+    setHitPoints2(MAXIMUM_HIT_POINTS);
   };
 
   const handleRuleSubmit = () => {
@@ -141,6 +199,29 @@ const SanskritGrammarGame = () => {
     }
   };
 
+  // プレイヤー2用のルール提出処理
+  const handleRuleSubmit2 = () => {
+    console.log('Player 2 submitted rule:', userRule2);
+
+    const currentQ = questions[currentQuestionIndex2];
+    if (userRule2.trim() === currentQ.rule) {
+      setPlayerScore2(prev => prev + 10);
+      alert('Player 2: Correct!');
+    } else {
+      damageHP2();
+      alert(`Player 2: Incorrect. The correct answer is: ${currentQ.rule}`);
+    }
+
+    if (currentQuestionIndex2 < questions.length - 1) {
+      setCurrentQuestionIndex2(prev => prev + 1);
+      setCurrentQuestion2(questions[currentQuestionIndex2 + 1].word);
+      setUserRule2('');
+    } else {
+      setGameState2('stopped');
+      // プレイヤー2のゲーム終了処理
+    }
+  };
+
   const changeDifficulty = () => {
     const difficulties: ('EASY' | 'HARD')[] = ['EASY', 'HARD'];
     const currentIndex = difficulties.indexOf(difficulty);
@@ -148,7 +229,13 @@ const SanskritGrammarGame = () => {
     setDifficulty(difficulties[nextIndex]);
   };
 
-  const handleModeSelect = (mode: 'single') => {
+  // プレイヤー2用の難易度変更
+  const changeDifficulty2 = () => {
+    // プレイヤー2の難易度は常にプレイヤー1と同じに設定
+    // 個別に変更したい場合は、ここで別の処理を実装
+  };
+
+  const handleModeSelect = (mode: 'single' | 'multi') => {
     setGameMode(mode);
     setCurrentScreen('modeSelect');
   };
@@ -156,11 +243,18 @@ const SanskritGrammarGame = () => {
   const handleDifficultySelect = (selectedDifficulty: 'EASY' | 'HARD') => {
     setDifficulty(selectedDifficulty);
     setCurrentScreen('game');
-    resetGame();
-    startGame();
+    
+    if (gameMode === 'single') {
+      resetGame();
+      startGame();
+    } else {
+      // 対戦モードの場合は両方のプレイヤーをリセット
+      resetGame();
+      resetGame2();
+      startGame();
+      startGame2();
+    }
   };
-
-  const currentQuestionData = questions[currentQuestionIndex];
 
   return (
     <>
@@ -175,7 +269,7 @@ const SanskritGrammarGame = () => {
         />
       )}
       
-      {currentScreen === 'game' && (
+      {currentScreen === 'game' && gameMode === 'single' && (
         difficulty === 'HARD' ? (
           <HardGameScreen 
             gameState={gameState}
@@ -209,6 +303,80 @@ const SanskritGrammarGame = () => {
             handleRuleSubmit={handleRuleSubmit}
             setUserRule={setUserRule}
             changeDifficulty={changeDifficulty}
+          />
+        )
+      )}
+      
+      {currentScreen === 'game' && gameMode === 'multi' && (
+        difficulty === 'HARD' ? (
+          <HardGameMultiScreen 
+            player1={{
+              gameState,
+              timer,
+              hitPoints,
+              currentQuestion,
+              userRule,
+              playerScore,
+              difficulty,
+              currentQuestionData,
+              startGame,
+              pauseGame,
+              resetGame,
+              handleRuleSubmit,
+              setUserRule,
+              changeDifficulty
+            }}
+            player2={{
+              gameState: gameState2,
+              timer: timer2,
+              hitPoints: hitPoints2,
+              currentQuestion: currentQuestion2,
+              userRule: userRule2,
+              playerScore: playerScore2,
+              difficulty,
+              currentQuestionData: currentQuestionData2,
+              startGame: startGame2,
+              pauseGame: pauseGame2,
+              resetGame: resetGame2,
+              handleRuleSubmit: handleRuleSubmit2,
+              setUserRule: setUserRule2,
+              changeDifficulty: changeDifficulty2
+            }}
+          />
+        ) : (
+          <EasyGameMultiScreen 
+            player1={{
+              gameState,
+              timer,
+              hitPoints,
+              currentQuestion,
+              userRule,
+              playerScore,
+              difficulty,
+              currentQuestionData,
+              startGame,
+              pauseGame,
+              resetGame,
+              handleRuleSubmit,
+              setUserRule,
+              changeDifficulty
+            }}
+            player2={{
+              gameState: gameState2,
+              timer: timer2,
+              hitPoints: hitPoints2,
+              currentQuestion: currentQuestion2,
+              userRule: userRule2,
+              playerScore: playerScore2,
+              difficulty,
+              currentQuestionData: currentQuestionData2,
+              startGame: startGame2,
+              pauseGame: pauseGame2,
+              resetGame: resetGame2,
+              handleRuleSubmit: handleRuleSubmit2,
+              setUserRule: setUserRule2,
+              changeDifficulty: changeDifficulty2
+            }}
           />
         )
       )}

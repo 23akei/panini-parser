@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface HomeScreenProps {
-  onSelectMode: (mode: 'single' | 'multiple') => void;
+  onSelectMode: (mode: 'single' | 'multi') => void;
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectMode }) => {
@@ -22,10 +22,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectMode }) => {
           </button>
           
           <button 
-            onClick={() => onSelectMode('multiple')}
+            onClick={() => onSelectMode('multi')}
             className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors"
           >
-            Multiplayer
+            2-Player Mode
           </button>
         </div>
       </div>
