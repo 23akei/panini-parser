@@ -56,8 +56,8 @@ async def get_word_details(
     """Get detailed information about a word"""
     try:
         request = WordDetailsRequest(word_id=word_id, include_forms=include_forms)
-        result = await word_service.get_word_details(request)
-        return result
+        # result = await word_service.get_word_details(request)
+        return None
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting word details: {str(e)}")
 
