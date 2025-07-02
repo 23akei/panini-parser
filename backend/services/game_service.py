@@ -16,6 +16,7 @@ from ..dto.game_dto import (
     GetChoicesResponse, SutraChoice
 )
 from vidyut.kosha import Kosha
+from vidyut.lipi import transliterate, Scheme
 
 
 class GameService(IGameService):
@@ -48,16 +49,16 @@ class GameService(IGameService):
             steps.append(
                 GameStep(
                     id=i + 1,
-                    from_word=from_word,
-                    to_word=to_word,
+                    from_word=self._to_devanagari(from_word),
+                    to_word=self._to_devanagari(to_word),
                     hint=None,
                 )
             )
             from_word = to_word  # Update from_word for next step
         session= GameSession(
             id=game_id,
-            root=dhatu.aupadeshika,
-            objective=prakriya.text,
+            root=self._to_devanagari(dhatu.aupadeshika),
+            objective=self._to_devanagari(prakriya.text),
             history=prakriya.history,
             current_step=1,  # Start at the first step
             started_at=datetime.now()
@@ -239,3 +240,9 @@ class GameService(IGameService):
         # Basic completion
         else:
             return "Bronze"
+    
+    def _to_devanagari(self, txt: str) -> str:
+        """Convert Sanskrit text to Devanagari script"""
+        # Placeholder for actual conversion logic
+        # This could use a library or custom mapping
+        return transliterate('gala~', Scheme.Slp1, Scheme.Devanagari)
