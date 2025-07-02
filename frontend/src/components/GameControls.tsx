@@ -27,7 +27,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         onClick={handlePlayPause}
         className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2"
       >
-        <span>{gameState === 'playing' ? '⏸️' : '▶️'}</span>
+        <span>{gameState === 'playing' ? '⏸️ ' : '▶️ '}</span>
         <span>{gameState === 'stopped' ? 'Start' : gameState === 'playing' ? 'Pause' : 'Resume'}</span>
       </button>
 
@@ -35,7 +35,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         onClick={onReset}
         className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors"
       >
-        🔄
+        <span>🔄 Reset</span>
       </button>
     </div>
   );

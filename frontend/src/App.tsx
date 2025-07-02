@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Timer from './components/Timer';
-import GameControls from './components/GameControls';
-import QuestionDisplay from './components/QuestionDisplay';
-import PlayArea from './components/PlayArea';
-import RuleInputForm from './components/RuleInputForm';
-import DifficultySelector from './components/DifficultySelector';
+import { MAXIMUM_HIT_POINTS } from './constants/appConstants';
+import HardGameScreen from './screens/HardGameScreen';
+import EasyGameScreen from './screens/EasyGameScreen';
+import HomeScreen from './screens/HomeScreen';
+import ModeSelectScreen from './screens/ModeSelectScreen';
+import GameClearScreen from './screens/GameClearScreen';
+import GameFailedScreen from './screens/GameFailedScreen';
 
 interface Question {
   word: string;
@@ -17,10 +18,13 @@ interface Question {
 const SanskritGrammarGame = () => {
   const [gameState, setGameState] = useState<'stopped' | 'playing' | 'paused'>('stopped');
   const [timer, setTimer] = useState(61);
+  const [hitPoints, setHitPoints] = useState(MAXIMUM_HIT_POINTS);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [userRule, setUserRule] = useState('');
   const [playerScore, setPlayerScore] = useState(192);
-  const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('EASY');
+  const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
+  const [gameMode, setGameMode] = useState<'single'>('single');
 
   const questions: Question[] = [
     {
@@ -41,22 +45,66 @@ const SanskritGrammarGame = () => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
+  // ホーム画面に戻る関数
+  const returnToHome = () => {
+    setCurrentScreen('home');
+    resetGame();
+  };
+
+  // ゲームクリア処理
+  const handleGameWin = () => {
+    setGameState('stopped');
+    setCurrentScreen('gameClear');
+  };
+
+  // ゲーム失敗処理
+  const handleGameFail = () => {
+    setGameState('stopped');
+    setCurrentScreen('gameFailed');
+  };
+
   useEffect(() => {
     let interval: number;
     if (gameState === 'playing' && timer > 0) {
       interval = setInterval(() => {
         setTimer(prev => prev - 1);
       }, 1000);
-    } else if (timer === 0) {
+    } else if (timer === 0 && gameState === 'playing') {
       setGameState('stopped');
+      handleGameFail(); // 時間切れでゲーム失敗
     }
     return () => clearInterval(interval);
   }, [gameState, timer]);
 
   const startGame = () => {
+    if (gameState === 'stopped') {
+      resetGame();
+    } else {
+      setCurrentQuestion(questions[currentQuestionIndex].word);
+    }
     setGameState('playing');
-    setTimer(61);
-    setCurrentQuestion(questions[currentQuestionIndex].word);
+  };
+
+  const healHP = () => {
+    if (hitPoints < MAXIMUM_HIT_POINTS) {
+      setHitPoints(prev => prev + 1);
+    } else {
+      alert('HPは最大値です！');
+    }
+  };
+
+  // ダメージ処理の修正
+  const damageHP = () => {
+    if (hitPoints > 1) {
+      setHitPoints(prev => prev - 1);
+    } else {
+      setHitPoints(0);
+      handleGameFail(); // HPがなくなるとゲーム失敗
+    }
+  };
+
+  const resetHP = () => {
+    setHitPoints(MAXIMUM_HIT_POINTS);
   };
 
   const pauseGame = () => {
@@ -69,6 +117,7 @@ const SanskritGrammarGame = () => {
     setCurrentQuestion('');
     setUserRule('');
     setCurrentQuestionIndex(0);
+    setHitPoints(MAXIMUM_HIT_POINTS);
   };
 
   const handleRuleSubmit = () => {
@@ -79,6 +128,7 @@ const SanskritGrammarGame = () => {
       setPlayerScore(prev => prev + 10);
       alert('正解！');
     } else {
+      damageHP();
       alert(`不正解。正解は: ${currentQ.rule}`);
     }
 
@@ -87,58 +137,100 @@ const SanskritGrammarGame = () => {
       setCurrentQuestion(questions[currentQuestionIndex + 1].word);
       setUserRule('');
     } else {
-      setGameState('stopped');
-      alert('ゲーム終了！');
+      handleGameWin(); // 全問題終了でゲームクリア
     }
   };
 
   const changeDifficulty = () => {
-    const difficulties: ('EASY' | 'MEDIUM' | 'HARD')[] = ['EASY', 'MEDIUM', 'HARD'];
+    const difficulties: ('EASY' | 'HARD')[] = ['EASY', 'HARD'];
     const currentIndex = difficulties.indexOf(difficulty);
     const nextIndex = (currentIndex + 1) % difficulties.length;
     setDifficulty(difficulties[nextIndex]);
   };
 
+  const handleModeSelect = (mode: 'single') => {
+    setGameMode(mode);
+    setCurrentScreen('modeSelect');
+  };
+
+  const handleDifficultySelect = (selectedDifficulty: 'EASY' | 'HARD') => {
+    setDifficulty(selectedDifficulty);
+    setCurrentScreen('game');
+    resetGame();
+    startGame();
+  };
+
   const currentQuestionData = questions[currentQuestionIndex];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-
-        <div className="flex justify-between items-center mb-8 border-b pb-4">
-          <div className="flex items-center space-x-4">
-            <QuestionDisplay currentQuestion={currentQuestion} />
-            <GameControls
-              gameState={gameState}
-              onStart={startGame}
-              onPause={pauseGame}
-              onReset={resetGame}
-            />
-          </div>
-          <Timer timer={timer} />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <PlayArea
-            currentQuestion={currentQuestion}
-            currentQuestionData={currentQuestionData}
-            playerScore={playerScore}
-          />
-
-          <RuleInputForm
-            userRule={userRule}
-            gameState={gameState}
-            onRuleChange={setUserRule}
-            onSubmit={handleRuleSubmit}
-          />
-        </div>
-
-        <DifficultySelector
-          difficulty={difficulty}
-          onChangeDifficulty={changeDifficulty}
+    <>
+      {currentScreen === 'home' && (
+        <HomeScreen onSelectMode={handleModeSelect} />
+      )}
+      
+      {currentScreen === 'modeSelect' && (
+        <ModeSelectScreen 
+          gameMode={gameMode} 
+          onSelectDifficulty={handleDifficultySelect} 
         />
-      </div>
-    </div>
+      )}
+      
+      {currentScreen === 'game' && (
+        difficulty === 'HARD' ? (
+          <HardGameScreen 
+            gameState={gameState}
+            timer={timer}
+            hitPoints={hitPoints}
+            currentQuestion={currentQuestion}
+            userRule={userRule}
+            playerScore={playerScore}
+            difficulty={difficulty}
+            currentQuestionData={currentQuestionData}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            handleRuleSubmit={handleRuleSubmit}
+            setUserRule={setUserRule}
+            changeDifficulty={changeDifficulty}
+          />
+        ) : (
+          <EasyGameScreen 
+            gameState={gameState}
+            timer={timer}
+            hitPoints={hitPoints}
+            currentQuestion={currentQuestion}
+            userRule={userRule}
+            playerScore={playerScore}
+            difficulty={difficulty}
+            currentQuestionData={currentQuestionData}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            handleRuleSubmit={handleRuleSubmit}
+            setUserRule={setUserRule}
+            changeDifficulty={changeDifficulty}
+          />
+        )
+      )}
+      
+      {currentScreen === 'gameClear' && (
+        <GameClearScreen 
+          playerScore={playerScore}
+          onReturnHome={returnToHome}
+        />
+      )}
+      
+      {currentScreen === 'gameFailed' && (
+        <GameFailedScreen
+          playerScore={playerScore}
+          onReturnHome={returnToHome}
+        />
+      )}
+      
+      {currentScreen === 'results' && (
+        <div>Results not implemented!</div>
+      )}
+    </>
   );
 };
 
