@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ModeSelectScreenProps {
-  gameMode: 'single' | 'multiple';
+  gameMode: 'single' | 'multi'; // 'multi'に変更
   onSelectDifficulty: (difficulty: 'EASY' | 'HARD') => void;
 }
 

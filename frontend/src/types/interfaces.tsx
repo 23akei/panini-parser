@@ -30,5 +30,5 @@ export interface GameScreenProps {
 }
 
 export interface PlayerProps extends GameScreenProps {
-  playerName: string;
+  playerName?: string; // オプショナルにする
 }

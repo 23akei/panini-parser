@@ -8,64 +8,68 @@ import HomeScreen from './screens/HomeScreen';
 import ModeSelectScreen from './screens/ModeSelectScreen';
 import GameClearScreen from './screens/GameClearScreen';
 import GameFailedScreen from './screens/GameFailedScreen';
-import type Question from './types/interfaces';
+import type { Question } from './types/interfaces';
 
 const SanskritGrammarGame = () => {
   const [gameState, setGameState] = useState<'stopped' | 'playing' | 'paused'>('stopped');
   const [timer, setTimer] = useState(61);
   const [hitPoints, setHitPoints] = useState(MAXIMUM_HIT_POINTS);
-  const [currentQuestion, setCurrentQuestion] = useState('');
   const [userRule, setUserRule] = useState('');
   const [playerScore, setPlayerScore] = useState(192);
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
   const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   // プレイヤー2のステート (対戦モード用)
   const [gameState2, setGameState2] = useState<'stopped' | 'playing' | 'paused'>('stopped');
   const [timer2, setTimer2] = useState(61);
   const [hitPoints2, setHitPoints2] = useState(MAXIMUM_HIT_POINTS);
-  const [currentQuestion2, setCurrentQuestion2] = useState('');
   const [userRule2, setUserRule2] = useState('');
   const [playerScore2, setPlayerScore2] = useState(192);
+
+  // 問題データを取得する関数
+  const getQuestions = (): Question[] => {
+    // 将来的には外部APIやサービスから取得する予定
+    return [
+      {
+        id: 1,
+        from: 'word1',
+        to: 'word2',
+        hint: 'hint_1_to_2'
+      },
+      {
+        id: 2,
+        from: 'word2',
+        to: 'word3',
+        hint: 'hint_2_to_3'
+      },
+      {
+        id: 3,
+        from: 'word3',
+        to: 'word4',
+        hint: 'hint_3_to_4'
+      },
+      {
+        id: 4,
+        from: 'word4',
+        to: 'word5',
+        hint: 'hint_4_to_5'
+      },
+      {
+        id: 5,
+        from: 'word5',
+        to: '',
+        hint: 'hint_5_to_end'
+      }
+    ];
+  };
+  
+  const [currentQuestion, setCurrentQuestion] = useState('');
+  const [currentQuestion2, setCurrentQuestion2] = useState('');
+  const [currentQuestionData, setCurrentQuestionData] = useState<Question>();
+  const [currentQuestionData2, setCurrentQuestionData2] = useState<Question>();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentQuestionIndex2, setCurrentQuestionIndex2] = useState(0);
-
-  const questions: Question[] = [
-    {
-      id: 1,
-      from: 'word1',
-      to: 'word2',
-      hint: 'hint_1_to_2'
-    },
-    {
-      id: 2,
-      from: 'word2',
-      to: 'word3',
-      hint: 'hint_2_to_3'
-    },
-    {
-      id: 3,
-      from: 'word3',
-      to: 'word4',
-      hint: 'hint_3_to_4'
-    },
-    {
-      id: 4,
-      from: 'word4',
-      to: 'word5',
-      hint: 'hint_4_to_5'
-    },
-    {
-      id: 5,
-      from: 'word5',
-      to: '',
-      hint: 'hint_5_to_end'
-    }
-  ]
-
-  const [currentQuestionData, setCurrentQuestionData] = useState<Question>(questions[0]);
-  const [currentQuestionData2, setCurrentQuestionData2] = useState<Question>(questions[0]);
 
   // ホーム画面に戻る関数
   const returnToHome = () => {
@@ -112,7 +116,10 @@ const SanskritGrammarGame = () => {
     if (gameState === 'stopped') {
       resetGame();
     } else {
-      setCurrentQuestion(questions[currentQuestionIndex].word);
+      const questions = getQuestions();
+      const currentQ = questions[currentQuestionIndex];
+      setCurrentQuestionData(currentQ);
+      setCurrentQuestion(currentQ.from);
     }
     setGameState('playing');
   };
@@ -122,7 +129,10 @@ const SanskritGrammarGame = () => {
     if (gameState2 === 'stopped') {
       resetGame2();
     } else {
-      setCurrentQuestion2(questions[currentQuestionIndex2].word);
+      const questions = getQuestions();
+      const currentQ = questions[currentQuestionIndex2];
+      setCurrentQuestionData2(currentQ);
+      setCurrentQuestion2(currentQ.from);
     }
     setGameState2('playing');
   };
@@ -175,6 +185,9 @@ const SanskritGrammarGame = () => {
     setUserRule('');
     setCurrentQuestionIndex(0);
     setHitPoints(MAXIMUM_HIT_POINTS);
+    const questions = getQuestions();
+    const initialQ = questions[0];
+    setCurrentQuestionData(initialQ);
   };
 
   // プレイヤー2用のリセット
@@ -185,23 +198,30 @@ const SanskritGrammarGame = () => {
     setUserRule2('');
     setCurrentQuestionIndex2(0);
     setHitPoints2(MAXIMUM_HIT_POINTS);
+    const questions = getQuestions();
+    const initialQ = questions[0];
+    setCurrentQuestionData2(initialQ);
   };
 
   const handleRuleSubmit = () => {
     console.log('Submitted rule:', userRule);
-
+    const questions = getQuestions();
     const currentQ = questions[currentQuestionIndex];
-    if (userRule.trim() === currentQ.rule) {
+    
+    if (userRule.trim() === currentQ.hint) {
       setPlayerScore(prev => prev + 10);
       alert('正解！');
     } else {
       damageHP();
-      alert(`不正解。正解は: ${currentQ.rule}`);
+      alert(`不正解。正解は: ${currentQ.hint}`);
     }
 
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setCurrentQuestion(questions[currentQuestionIndex + 1].word);
+      const nextIndex = currentQuestionIndex + 1;
+      const nextQ = questions[nextIndex];
+      setCurrentQuestionIndex(nextIndex);
+      setCurrentQuestionData(nextQ);
+      setCurrentQuestion(nextQ.from);
       setUserRule('');
     } else {
       handleGameWin(); // 全問題終了でゲームクリア
@@ -211,19 +231,23 @@ const SanskritGrammarGame = () => {
   // プレイヤー2用のルール提出処理
   const handleRuleSubmit2 = () => {
     console.log('Player 2 submitted rule:', userRule2);
-
+    const questions = getQuestions();
     const currentQ = questions[currentQuestionIndex2];
-    if (userRule2.trim() === currentQ.rule) {
+    
+    if (userRule2.trim() === currentQ.hint) {
       setPlayerScore2(prev => prev + 10);
       alert('Player 2: Correct!');
     } else {
       damageHP2();
-      alert(`Player 2: Incorrect. The correct answer is: ${currentQ.rule}`);
+      alert(`Player 2: Incorrect. The correct answer is: ${currentQ.hint}`);
     }
 
     if (currentQuestionIndex2 < questions.length - 1) {
-      setCurrentQuestionIndex2(prev => prev + 1);
-      setCurrentQuestion2(questions[currentQuestionIndex2 + 1].word);
+      const nextIndex = currentQuestionIndex2 + 1;
+      const nextQ = questions[nextIndex];
+      setCurrentQuestionIndex2(nextIndex);
+      setCurrentQuestionData2(nextQ);
+      setCurrentQuestion2(nextQ.from);
       setUserRule2('');
     } else {
       setGameState2('stopped');
@@ -333,7 +357,8 @@ const SanskritGrammarGame = () => {
               resetGame,
               handleRuleSubmit,
               setUserRule,
-              changeDifficulty
+              changeDifficulty,
+              playerName: "Player 1"
             }}
             player2={{
               gameState: gameState2,
@@ -368,7 +393,8 @@ const SanskritGrammarGame = () => {
               resetGame,
               handleRuleSubmit,
               setUserRule,
-              changeDifficulty
+              changeDifficulty,
+              playerName: "Player 1"
             }}
             player2={{
               gameState: gameState2,
