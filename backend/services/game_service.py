@@ -8,12 +8,12 @@ from typing import Optional, Dict
 
 from .interfaces import IGameService
 from .word_service import WordService
-from ..repositories.interfaces import IGameRepository, IWordRepository, ILeaderboardRepository, IStatsRepository
-from ..models.game import GameSession, GameAnswer, GameDifficulty, GameStatus, AnswerStatus
+from ..models.game import GameSession
 from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
     GameStatusResponse, FinishGameResponse, RuleDetailsResponse, GameStep
 )
+from vidyut.kosha import Kosha
 
 
 class GameService(IGameService):
@@ -21,10 +21,11 @@ class GameService(IGameService):
 
     def __init__(
         self,
+        kosha: Kosha,
         sessions: Optional[Dict[str, GameSession]] = None,
     ):
         self.sessions = sessions if sessions is not None else {}
-        self._word_service = WordService()
+        self._word_service = WordService(kosha)
 
     async def start_game(self, request: StartGameRequest) -> StartGameResponse:
         """Start a new game session"""
@@ -37,7 +38,7 @@ class GameService(IGameService):
         from_word = dhatu.aupadeshika
         for i, step in enumerate(prakriya.history):
             print(f"Step {i + 1}: {step}, Code: {step.code}, Result: {step.result}")
-
+                  
             to_word = ''.join(step.result)
             steps.append(
                 GameStep(
@@ -57,7 +58,7 @@ class GameService(IGameService):
             started_at=datetime.now()
         )
         self.sessions[game_id] = session
-
+        
 
         return StartGameResponse(
             game_id=game_id,
@@ -154,10 +155,10 @@ class GameService(IGameService):
                 "next": ["1.4.15", "1.4.16"]
             }
         }
-
+        
         if sutra not in sample_rules:
             raise ValueError(f"Rule {sutra} not found")
-
+            
         rule_data = sample_rules[sutra]
         return RuleDetailsResponse(
             sutra=sutra,

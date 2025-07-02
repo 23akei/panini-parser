@@ -6,15 +6,17 @@ from typing import  Optional
 import random
 
 from vidyut.prakriya import Vyakarana,Dhatu,Pada, Lakara, Prayoga, Purusha, Vacana, Prakriya, Linga, Vibhakti , Gana
+from vidyut.kosha import Kosha, DhatuEntry
 
 class WordService:
     """Service for word-related operations"""
-    def __init__(self ):
+    def __init__(self, kosha:Kosha ):
         self._v = Vyakarana()
+        self.kosha:list[DhatuEntry] = list(kosha.dhatus())
     
     def get_random_dhatu(self) -> Optional[Dhatu]:
         """ Get a random root word (dhatu) for gameplay """
-        return Dhatu.mula("BU", Gana.Bhvadi)
+        return random.choice(self.kosha).dhatu
     def get_random_prakriya(self, dhatu) -> Optional[Prakriya]:
         # TODO: Implement logic to fetch a random dhatu or pratipadika
         return self.get_random_tinanta_prakriya(dhatu)
