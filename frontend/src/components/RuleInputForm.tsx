@@ -21,13 +21,13 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              パーニニ規則を入力してください:
+              Enter Panini Rule:
             </label>
             <textarea
               value={userRule}
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              placeholder="例: अकारान्त पुल्लिङ्ग प्रथमा एकवचन"
+              placeholder="Example: अकारान्त पुल्लिङ्ग प्रथमा एकवचन"
               disabled={gameState !== 'playing'}
             />
           </div>

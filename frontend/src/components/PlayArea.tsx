@@ -28,13 +28,13 @@ const PlayArea: React.FC<PlayAreaProps> = ({
           {currentQuestion && currentQuestionData && (
             <div className="bg-white rounded-lg p-4 border">
               <div className="text-lg mb-2">
-                <strong>語根:</strong> <span className="font-devanagari text-xl">{currentQuestion}</span>
+                <strong>Root:</strong> <span className="font-devanagari text-xl">{currentQuestion}</span>
               </div>
               <div className="text-sm text-gray-600">
-                <strong>求める形:</strong> {currentQuestionData.case} {currentQuestionData.number}
+                <strong>Desired Form:</strong> {currentQuestionData.case} {currentQuestionData.number}
               </div>
               <div className="text-sm text-gray-600 mt-2">
-                <strong>期待される語形:</strong>
+                <strong>Expected Form:</strong>
                 <span className="font-devanagari text-lg ml-2">{currentQuestionData.expected}</span>
               </div>
             </div>
@@ -42,7 +42,7 @@ const PlayArea: React.FC<PlayAreaProps> = ({
 
           <div className="text-center py-8">
             <div className="text-6xl mb-4">1.4.24</div>
-            <div className="text-2xl text-gray-600">パーニニ規則番号</div>
+            <div className="text-2xl text-gray-600">Panini Rule Number</div>
           </div>
         </div>
       </div>
