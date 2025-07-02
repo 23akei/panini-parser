@@ -11,6 +11,7 @@
       X                               A0
       Y                               A1
 */
+const int DEVICE_ID = 2; // †ハードコーディング†
 
 int initialStickX, initialStickY;
 const unsigned int BAUD_RATE = 9600;
@@ -22,7 +23,8 @@ const unsigned long DEBOUNCE_DELAY = 50; // Wait 50ms to confirm stable button s
 
 const int ANALOG_X_PIN = A0;
 const int ANALOG_Y_PIN = A1;
-const int STICK_DEADZONE = 100; // 
+const int STICK_DEADZONE = 100;
+byte lastDirection;
 
 // direction bit
 enum DirectionBits {
@@ -31,6 +33,9 @@ enum DirectionBits {
   DIR_LEFT  = 0b0010,
   DIR_RIGHT = 0b0001
 };
+
+char buf[64];
+//const char* buttonChars[9] = { "", "", "A", "B", "C", "D", "E", "F", "KEY" };
 
 void setup() {
   for (int i = 0; i < 19; i++) {
@@ -50,18 +55,17 @@ void setup() {
   delay(100);
   initialStickX = analogRead(A0);
   initialStickY = analogRead(A1);
-  Serial.print("initialStickX = ");
-  Serial.println(initialStickX);
 
-  Serial.print("initialStickY = ");
-  Serial.println(initialStickY);
+  lastDirection = 0;
+//  sprintf(buf, "initialStickX = %d", initialStickX);
+//  Serial.println(buf);
+//  sprintf(buf, "initialStickX = %d", initialStickX);
+//  Serial.println(buf);
 }
-
-char buf[64];
-const char* buttonChars[9] = { "", "", "A", "B", "C", "D", "E", "F", "KEY" };
 
 void loop() {
   unsigned long currentMillis = millis();
+  bool hasChanged = false;
 
   for (int i = 2; i < 9; ++i) {
     bool isPressed = !digitalRead(i);
@@ -71,8 +75,9 @@ void loop() {
     if (currentMillis - lastDebounceTime[i] > DEBOUNCE_DELAY) {
       if (isPressed != currentButtonState[i]) {
         currentButtonState[i] = isPressed;
-        sprintf(buf, "---> Button %s %s !", buttonChars[i], isPressed ? "pressed" : "released");
-        Serial.println(buf); 
+        hasChanged = true;
+//        sprintf(buf, "---> Button %s %s !", buttonChars[i], isPressed ? "pressed" : "released");
+//        Serial.println(buf); 
       }
     }
     lastButtonState[i] = isPressed;
@@ -95,11 +100,26 @@ void loop() {
     direction |= DIR_DOWN;
   }
 
-  printDirection(direction);
+  if (lastDirection != direction) {
+    lastDirection = direction;
+    hasChanged = true;
+  }
+
+//  printDirection(direction);
 //  sprintf(buf, "X = %d", stickX);
 //  Serial.println(buf);
 //  sprintf(buf, "Y = %d", stickY);
 //  Serial.println(buf);
+
+  if (hasChanged) printData(direction, currentButtonState, sizeof(currentButtonState) / sizeof(bool));
+}
+
+
+void printData(byte dir, bool *currentButtonState, int buttonCnt) {
+  int buttonBits = 0;
+  for (int i = 0; i < buttonCnt; ++i) buttonBits |= currentButtonState[i] << i;
+  sprintf(buf, "%d,%u,%u", DEVICE_ID, dir, buttonBits); // e.g., 1,4,48
+  Serial.println(buf);
 }
 
 void printDirection(byte dir) {

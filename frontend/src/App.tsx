@@ -5,6 +5,7 @@ import QuestionDisplay from './components/QuestionDisplay';
 import PlayArea from './components/PlayArea';
 import RuleInputForm from './components/RuleInputForm';
 import DifficultySelector from './components/DifficultySelector';
+import { connectToArduino } from './assets/serial';
 
 interface Question {
   word: string;
@@ -101,9 +102,25 @@ const SanskritGrammarGame = () => {
 
   const currentQuestionData = questions[currentQuestionIndex];
 
+  const [arduinoInput, setArduinoInput] = useState('');
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+      <div className="mt-4 text-sm text-gray-600">
+        Arduino入力: <span className="font-mono">{arduinoInput}</span>
+      </div>
+      <button
+        onClick={() => {
+          connectToArduino((line: string) => {
+            console.log('Arduino says:', line);
+            setArduinoInput(line);
+          });
+        }}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Arduinoと接続
+      </button>
 
         <div className="flex justify-between items-center mb-8 border-b pb-4">
           <div className="flex items-center space-x-4">
