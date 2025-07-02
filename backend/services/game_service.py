@@ -37,8 +37,8 @@ class GameService(IGameService):
 
         # Generate sample steps for demonstration
         steps = [
-            GameStep(id=1, from_="गम्", to="गच्छ", hint=None),
-            GameStep(id=2, from_="गच्छ", to="गच्छति", hint=None)
+            GameStep(id=1, **{"from": "गम्", "to": "गच्छ", "hint": None}),
+            GameStep(id=2, **{"from": "गच्छ", "to": "गच्छति", "hint": None})
         ]
         
         return StartGameResponse(
