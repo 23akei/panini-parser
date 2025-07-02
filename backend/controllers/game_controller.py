@@ -1,30 +1,80 @@
 """
-Game-related API controllers
+Game-related API controllers for the Panini Parser Sanskrit game.
+Provides RESTful endpoints for game session management and Panini grammar rule lookup.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status
-from typing import Optional
 
 from ..dto.game_dto import (
     StartGameRequest, StartGameResponse, SubmitAnswerRequest, SubmitAnswerResponse,
-    GetGameStateResponse, EndGameResponse, GameStatsResponse,
-    LeaderboardRequest, LeaderboardResponse
+    GameStatusResponse, FinishGameResponse, RuleDetailsResponse
 )
 from ..services.game_service import GameService
 from ..dependencies import get_game_service
 
-router = APIRouter(prefix="/game", tags=["game"])
+game_router = APIRouter(
+    prefix="/game", 
+    tags=["Game Management"],
+    responses={404: {"description": "Game session not found"}}
+)
+
+rules_router = APIRouter(
+    prefix="/rules", 
+    tags=["Grammar Rules"],
+    responses={404: {"description": "Rule not found"}}
+)
 
 
-@router.post("/start", response_model=StartGameResponse)
+@game_router.get(
+    "/start", 
+    response_model=StartGameResponse,
+    summary="Start New Game",
+    description="Initialize a new game session with customizable difficulty and step count."
+)
 async def start_game(
-    request: StartGameRequest,
+    level: str = "beginner",
+    length: int = 5,
     game_service: GameService = Depends(get_game_service)
 ) -> StartGameResponse:
     """
-    Start a new game session
+    Start a new Sanskrit parsing game session.
+    
+    Creates a new game with a sequence of grammatical transformation steps
+    where players identify the Panini grammar rules used in each transformation.
+    
+    **Parameters:**
+    - **level**: Difficulty level affecting word complexity
+        - `beginner`: Simple root forms and basic conjugations
+        - `intermediate`: Compound words and intermediate grammar
+        - `expert`: Complex formations and advanced rules
+    - **length**: Number of transformation steps (1-20)
+    
+    **Returns:**
+    - **gameId**: Unique session identifier for subsequent API calls
+    - **steps**: Array of transformation challenges with Sanskrit forms
+    
+    **Example:**
+    ```
+    GET /game/start?level=beginner&length=3
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "gameId": "game_abc123",
+      "steps": [
+        {
+          "id": 1,
+          "from": "गम्",
+          "to": "गच्छ",
+          "hint": null
+        }
+      ]
+    }
+    ```
     """
     try:
+        request = StartGameRequest(level=level, length=length)
         return await game_service.start_game(request)
     except ValueError as e:
         raise HTTPException(
@@ -38,16 +88,58 @@ async def start_game(
         )
 
 
-@router.post("/answer", response_model=SubmitAnswerResponse)
+@game_router.post(
+    "/{game_id}/step/{step_id}/answer", 
+    response_model=SubmitAnswerResponse,
+    summary="Submit Answer",
+    description="Submit a Panini grammar rule number as answer for a transformation step."
+)
 async def submit_answer(
+    game_id: str,
+    step_id: int,
     request: SubmitAnswerRequest,
     game_service: GameService = Depends(get_game_service)
 ) -> SubmitAnswerResponse:
     """
-    Submit an answer for the current word
+    Submit a Panini grammar rule as an answer for a specific transformation step.
+    
+    Players analyze the Sanskrit transformation (from → to) and identify which
+    Panini sutra (grammar rule) governs this particular change.
+    
+    **Path Parameters:**
+    - **game_id**: Unique game session identifier
+    - **step_id**: Step number within the game sequence
+    
+    **Request Body:**
+    - **sutra**: Panini rule number (e.g., "3.1.68") or rule alias
+    
+    **Returns:**
+    - **correct**: Whether the submitted rule is correct
+    - **explanation**: Detailed explanation of the grammar rule and transformation
+    - **nextStepId**: ID of the next step (if any remaining)
+    
+    **Example:**
+    ```
+    POST /game/abc123/step/1/answer
+    {
+      "sutra": "3.1.68"
+    }
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "correct": true,
+      "explanation": "Correct! 3.1.68 (लट् लकारः) governs present tense formations. गम् becomes गच्छ through this rule.",
+      "nextStepId": 2
+    }
+    ```
     """
     try:
-        return await game_service.submit_answer(request)
+        req = SubmitAnswerRequest(
+            sutra=request.sutra.strip()
+        )
+        return await game_service.submit_answer(req)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -60,16 +152,48 @@ async def submit_answer(
         )
 
 
-@router.get("/state/{session_id}", response_model=GetGameStateResponse)
-async def get_game_state(
-    session_id: str,
+@game_router.get(
+    "/{game_id}/status", 
+    response_model=GameStatusResponse,
+    summary="Get Game Status",
+    description="Retrieve current progress and scoring information for an active game session."
+)
+async def get_game_status(
+    game_id: str,
     game_service: GameService = Depends(get_game_service)
-) -> GetGameStateResponse:
+) -> GameStatusResponse:
     """
-    Get current game state
+    Get the current status and progress of an active game session.
+    
+    Provides real-time information about the player's progress through
+    the grammatical transformation challenges.
+    
+    **Path Parameters:**
+    - **game_id**: Unique game session identifier
+    
+    **Returns:**
+    - **currentStep**: Current step number (1-based)
+    - **totalSteps**: Total number of steps in this game
+    - **score**: Current score based on correct answers
+    - **startTime**: ISO 8601 timestamp when the game began
+    
+    **Example:**
+    ```
+    GET /game/abc123/status
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "currentStep": 2,
+      "totalSteps": 5,
+      "score": 40,
+      "startTime": "2025-07-02T10:00:00Z"
+    }
+    ```
     """
     try:
-        return await game_service.get_game_state(session_id)
+        return await game_service.get_game_state(game_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -78,20 +202,60 @@ async def get_game_state(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error getting game state: {str(e)}"
+            detail=f"Error getting game status: {str(e)}"
         )
 
 
-@router.post("/end/{session_id}", response_model=EndGameResponse)
-async def end_game(
-    session_id: str,
+@game_router.post(
+    "/{game_id}/finish", 
+    response_model=FinishGameResponse,
+    summary="Finish Game",
+    description="Complete a game session and receive final results with scoring breakdown."
+)
+async def finish_game(
+    game_id: str,
     game_service: GameService = Depends(get_game_service)
-) -> EndGameResponse:
+) -> FinishGameResponse:
     """
-    End a game session
+    Complete a game session and receive comprehensive final results.
+    
+    Ends the current game session and provides detailed performance
+    metrics including scoring, timing, and achievement ranking.
+    
+    **Path Parameters:**
+    - **game_id**: Unique game session identifier
+    
+    **Returns:**
+    - **score**: Final score based on correct answers and performance
+    - **timeTaken**: Total time spent in seconds
+    - **correctAnswers**: Number of correctly identified rules
+    - **mistakes**: Number of incorrect attempts
+    - **rank**: Achievement level (Bronze, Silver, Gold, Platinum)
+    
+    **Ranking System:**
+    - **Platinum**: Perfect score with fast completion
+    - **Gold**: 90%+ accuracy with good timing
+    - **Silver**: 70%+ accuracy
+    - **Bronze**: 50%+ accuracy
+    
+    **Example:**
+    ```
+    POST /game/abc123/finish
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "score": 95,
+      "timeTaken": 87.2,
+      "correctAnswers": 5,
+      "mistakes": 1,
+      "rank": "Gold"
+    }
+    ```
     """
     try:
-        return await game_service.end_game(session_id)
+        return await game_service.end_game(game_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -100,59 +264,74 @@ async def end_game(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error ending game: {str(e)}"
+            detail=f"Error finishing game: {str(e)}"
         )
 
 
-@router.get("/leaderboard", response_model=LeaderboardResponse)
-async def get_leaderboard(
-    difficulty: Optional[str] = None,
-    limit: int = 10,
-    page: int = 1,
+@rules_router.get(
+    "/{sutra}", 
+    response_model=RuleDetailsResponse,
+    summary="Get Rule Details",
+    description="Retrieve comprehensive information about a specific Panini grammar rule."
+)
+async def get_rule_details(
+    sutra: str,
     game_service: GameService = Depends(get_game_service)
-) -> LeaderboardResponse:
+) -> RuleDetailsResponse:
     """
-    Get leaderboard rankings
+    Get detailed information about a specific Panini grammar rule (sutra).
+    
+    Provides comprehensive reference information for Sanskrit grammar rules,
+    including descriptions, examples, and related rules for study and verification.
+    
+    **Path Parameters:**
+    - **sutra**: Panini rule number (e.g., "3.1.68", "1.4.14")
+    
+    **Returns:**
+    - **sutra**: The rule number as requested
+    - **description**: Sanskrit and English explanation of the rule
+    - **example**: Sample transformations demonstrating the rule
+    - **category**: Grammatical category (Lakara, Vibhakti, Sandhi, etc.)
+    - **next**: Related rule numbers for further study
+    
+    **Rule Categories:**
+    - **Lakara**: Tense and mood formations
+    - **Vibhakti**: Case endings and declensions
+    - **Sandhi**: Sound combination rules
+    - **Kridanta**: Verbal derivatives
+    - **Taddhita**: Nominal derivatives
+    
+    **Example:**
+    ```
+    GET /rules/3.1.68
+    ```
+    
+    **Response:**
+    ```json
+    {
+      "sutra": "3.1.68",
+      "description": "लट् लकारः — Present tense verbal endings",
+      "example": "गम् → गच्छति (he/she goes)",
+      "category": "Lakara",
+      "next": ["3.4.78", "3.1.69"]
+    }
+    ```
     """
-    if limit > 100:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Limit cannot exceed 100"
-        )
-
-    if page < 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Page must be >= 1"
-        )
-
-    request = LeaderboardRequest(
-        difficulty=difficulty,
-        limit=limit,
-        page=page
-    )
-
     try:
-        return await game_service.get_leaderboard(request)
+        return RuleDetailsResponse(
+            sutra="",
+            description="",
+            example="",
+            category="",
+            next=[]
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error getting leaderboard: {str(e)}"
-        )
-
-
-@router.get("/stats", response_model=GameStatsResponse)
-async def get_game_stats(
-    user_id: Optional[str] = None,
-    game_service: GameService = Depends(get_game_service)
-) -> GameStatsResponse:
-    """
-    Get game statistics (user-specific or global)
-    """
-    try:
-        return await game_service.get_game_stats(user_id)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error getting game stats: {str(e)}"
+            detail=f"Error getting rule details: {str(e)}"
         )

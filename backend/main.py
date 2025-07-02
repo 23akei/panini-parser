@@ -7,7 +7,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from .controllers.word_controller import router as word_router
 from .controllers.game_controller import router as game_router
 
 app = FastAPI(
