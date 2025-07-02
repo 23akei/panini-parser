@@ -21,16 +21,26 @@ const ModeSelectScreen: React.FC<ModeSelectScreenProps> = ({
         </h1>
         
         <div className="space-y-6">
-          <div className="bg-blue-50 p-6 rounded-lg text-center hover:bg-blue-100 transition duration-200 cursor-pointer"
-               onClick={() => onSelectDifficulty('EASY')}>
+          <div className="bg-blue-50 p-6 rounded-lg text-center">
             <h2 className="text-2xl font-semibold mb-2 text-blue-700">EASY</h2>
-            <p className="text-gray-700">For beginners. Learn basic grammar rules.</p>
+            <p className="text-gray-700 mb-4">For beginners. Learn basic grammar rules.</p>
+            <button
+              onClick={() => onSelectDifficulty('EASY')}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors"
+            >
+              Select EASY
+            </button>
           </div>
           
-          <div className="bg-red-50 p-6 rounded-lg text-center hover:bg-red-100 transition duration-200 cursor-pointer"
-               onClick={() => onSelectDifficulty('HARD')}>
+          <div className="bg-red-50 p-6 rounded-lg text-center">
             <h2 className="text-2xl font-semibold mb-2 text-red-700">HARD</h2>
-            <p className="text-gray-700">For advanced players. Challenge complex grammar rules.</p>
+            <p className="text-gray-700 mb-4">For advanced players. Challenge complex grammar rules.</p>
+            <button
+              onClick={() => onSelectDifficulty('HARD')}
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors"
+            >
+              Select HARD
+            </button>
           </div>
         </div>
       </div>
