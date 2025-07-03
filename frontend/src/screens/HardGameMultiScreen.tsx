@@ -145,6 +145,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
 }) => {
   return (
     <div className="h-screen flex bg-[#001f3f] p-4 gap-6 overflow-hidden">
+      <audio src="main.m4a" autoPlay loop id="myAudio"></audio>
       <div className="flex-1 h-full">
         <PlayerSection 
           {...player1}
