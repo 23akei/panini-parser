@@ -18,7 +18,9 @@ import PlayArea from './components/PlayArea';
 import RuleInputForm from './components/RuleInputForm';
 import DifficultySelector from './components/DifficultySelector';
 import { useGameOperations, useGameStatus } from './hooks/useGame';
-import type { StartGameResponse, GameStep } from './api/client';
+import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
+import { mapStepsToQuestions } from './mapper/mapper';
+import type { SutraChoice } from '../components/SutraChoices';
 
 const SanskritGrammarGame = () => {
   /**
@@ -44,7 +46,7 @@ const SanskritGrammarGame = () => {
 
   // Timer effect
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameFailed'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
   const [timer, setTimer] = useState(INIT_TIMER);
   
@@ -79,43 +81,48 @@ const SanskritGrammarGame = () => {
   };
   
   // 問題データを取得する関数
-  const getQuestions = (): { value1: Question[]; value2: string } => {
+  const getQuestions = async (): Promise<{ value1: Question[]; value2: string }> => {
     // 将来的には外部APIやサービスから取得する予定
+    // return {
+    //   value1: [
+    //     {
+    //       id: 1,
+    //       from_word: 'word1',
+    //       to_word: 'word2',
+    //       hint: 'hint_1_to_2'
+    //     },
+    //     {
+    //       id: 2,
+    //       from_word: 'word2',
+    //       to_word: 'word3',
+    //       hint: 'hint_2_to_3'
+    //     },
+    //     {
+    //       id: 3,
+    //       from_word: 'word3',
+    //       to_word: 'word4',
+    //       hint: 'hint_3_to_4'
+    //     },
+    //     {
+    //       id: 4,
+    //       from_word: 'word4',
+    //       to_word: 'word5',
+    //       hint: 'hint_4_to_5'
+    //     },
+    //     {
+    //       id: 5,
+    //       from_word: 'word5',
+    //       to_word: '',
+    //       hint: 'hint_5_to_end'
+    //     }
+    // ],
+    // value2: 'game_id_12345' // 仮のゲームID
+    // };
+    const startGameResult = await ApiClient.startGame()
     return {
-      value1: [
-        {
-          id: 1,
-          from_word: 'word1',
-          to_word: 'word2',
-          hint: 'hint_1_to_2'
-        },
-        {
-          id: 2,
-          from_word: 'word2',
-          to_word: 'word3',
-          hint: 'hint_2_to_3'
-        },
-        {
-          id: 3,
-          from_word: 'word3',
-          to_word: 'word4',
-          hint: 'hint_3_to_4'
-        },
-        {
-          id: 4,
-          from_word: 'word4',
-          to_word: 'word5',
-          hint: 'hint_4_to_5'
-        },
-        {
-          id: 5,
-          from_word: 'word5',
-          to_word: '',
-          hint: 'hint_5_to_end'
-        }
-    ],
-    value2: 'game_id_12345' // 仮のゲームID
-    };
+      value1: mapStepsToQuestions(startGameResult),
+      value2: startGameResult.game_id // APIから取得したゲームIDを使用  
+    }
   };
 
   // ホーム画面に戻る関数
@@ -130,11 +137,17 @@ const SanskritGrammarGame = () => {
     setCurrentScreen('gameClear');
   };
 
-  // ゲーム失敗処理
-  const handleGameFail = () => {
+    // ゲームクリア処理
+  const handleGameWin2 = () => {
     setGameState('stopped');
-    setCurrentScreen('gameFailed');
+    setCurrentScreen('gameClear2');
   };
+
+  // ゲーム失敗処理
+  // const handleGameFail = () => {
+  //   setGameState('stopped');
+  //   setCurrentScreen('gameFailed');
+  // };
 
   // ゲーム開始処理
   const startGame = () => {
@@ -159,7 +172,7 @@ const SanskritGrammarGame = () => {
       setHitPoints(prev => prev - 1);
     } else {
       setHitPoints(0);
-      handleGameFail(); // HPがなくなるとゲーム失敗
+      handleGameWin2(); // HPがなくなるとゲーム失敗
     }
   };
 
@@ -168,9 +181,11 @@ const SanskritGrammarGame = () => {
     if (hitPoints2 > 1) {
       setHitPoints2(prev => prev - 1);
     } else {
-      setHitPoints2(0);
       // プレイヤー2のゲーム失敗処理
+      setHitPoints2(0);
+      handleGameWin(); // HPがなくなるとゲーム失敗
     }
+    
   };
 
   const resetHP = () => {
@@ -181,11 +196,11 @@ const SanskritGrammarGame = () => {
     setGameState('paused');
   };
 
-  const resetGame = () => {
+  const resetGame = async () => {
     // ゲームの状態をリセット
     setGameState('stopped');
     setTimer(INIT_TIMER);
-    const result = getQuestions();
+    const result = await getQuestions();
     setQuestions(result.value1);
     setGameId(result.value2);
     setCurrentQuestionDataIndex(0);
@@ -243,6 +258,34 @@ const SanskritGrammarGame = () => {
     }
   };
 
+  const selectRuleSubmit = async (choice: SutraChoice) => {
+    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.desc })
+    if (result.correct === true) {
+      damageHP2();
+    } else {
+      damageHP();
+    }
+    if (result.next_step_id) {
+      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
+    } else {
+      handleGameWin();
+    }
+  }
+
+    const selectRuleSubmit2 = async (choice: SutraChoice) => {
+    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.desc })
+    if (result.correct === true) {
+      damageHP();
+    } else {
+      damageHP2();
+    }
+    if (result.next_step_id) {
+      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
+    } else {
+      handleGameWin2();
+    }
+  }
+
   const handleModeSelect = (mode: 'single' | 'multi') => {
     setGameMode(mode);
     setCurrentScreen('modeSelect');
@@ -296,7 +339,8 @@ const SanskritGrammarGame = () => {
               currentQuestionDataIndex: currentQuestionDataIndex,
               setUserInput: setUserInput,
               handleRuleSubmit: handleRuleSubmit,
-              playerName: "Player 1"
+              playerName: "Player 1",
+              selectRuleSubmit: selectRuleSubmit
             }}
             player2={{
               gameState: gameState,
@@ -306,7 +350,8 @@ const SanskritGrammarGame = () => {
               currentQuestionDataIndex: currentQuestionDataIndex,
               setUserInput: setUserInput2,
               handleRuleSubmit: handleRuleSubmit2,
-              playerName: "Player 2"
+              playerName: "Player 2",
+              selectRuleSubmit: selectRuleSubmit2
             }}
           />
         ) : (
@@ -316,10 +361,18 @@ const SanskritGrammarGame = () => {
 
       {currentScreen === 'gameClear' && (
         <GameClearScreen
-          playerScore={playerScore}
+          playerName="Player 1"
           onReturnHome={returnToHome}
         />
       )}
+
+      {currentScreen === 'gameClear2' && (
+        <GameClearScreen
+          playerName="Player 2"
+          onReturnHome={returnToHome}
+        />
+      )}
+
 
       {currentScreen === 'gameFailed' && (
         <GameFailedScreen

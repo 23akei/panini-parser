@@ -109,6 +109,16 @@ export class ApiClient {
       throw new Error('Failed to get rule details. Please try again.');
     }
   }
+
+  static async getSutraChoices(gameId: string, stepId: number): Promise< Array<{ sutra: string; desc: string }> > {
+    try {
+      const response = await gameApi.getSutraChoicesApiV1GameGameIdStepStepIdChoicesGet(gameId, stepId);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get sutra choices:', error);
+      throw new Error('Failed to get sutra choices. Please try again.');
+    }
+  }
 }
 
 // Re-export types for convenience
