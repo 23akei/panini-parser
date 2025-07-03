@@ -1,5 +1,6 @@
 // 共通のインターフェース定義
 import type { GameStep } from '../api/client';
+import type { SutraChoice } from '../screens/HardGameMultiScreen';
 
 // Use GameStep from OpenAPI instead of local Question interface
 export type Question = GameStep;
@@ -39,6 +40,7 @@ export interface PlayerProps {
   currentQuestionDataIndex: number;
   setUserInput: (input: string) => void;
   handleRuleSubmit: (questions: Question[]) => void;
+  selectRuleSubmit: (choice: SutraChoice) => void; // ルール選択のサブミット関数
   playerName: string;
   gameId: string; // 追加: ゲームID
 }

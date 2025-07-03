@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import Timer from '../components/Timer';
 import GameControls from '../components/GameControls';
 import QuestionDisplay from '../components/QuestionDisplay';
@@ -9,31 +10,48 @@ import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import HintsPanel from '../components/HintsPanel';
+import { ApiClient } from '../api/client';
 
 // Sutra選択肢の型定義
 interface SutraChoice {
-  id: string;
-  text: string;
+  sutra: string;
+  desc: string;
 }
+
+export type { SutraChoice };
 
 // Sutra選択肢を表示するコンポーネント
 const SutraChoicesComponent: React.FC<{
-  choices: SutraChoice[];
+  choices: Promise<SutraChoice[]>;
   onSelect: (choice: SutraChoice) => void;
   disabled: boolean;
 }> = ({ choices, onSelect, disabled }) => {
+  const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
+
+  useEffect(() => {
+    const fetchChoices = async () => {
+      try {
+        const result = await choices;
+        setChoiceList(result);
+      } catch (err) {
+        console.error('Failed to fetch sutra choices:', err);
+      }
+  };
+  fetchChoices();
+}, [choices]);
+
   return (
     <div className="mt-4 space-y-2">
       <h3 className="font-semibold text-gray-700">Select rule:</h3>
       <div className="grid grid-cols-1 gap-2">
-        {choices.map(choice => (
+        {choiceList.map(choice => (
           <button
-            key={choice.id}
+            key={choice.sutra}
             onClick={() => onSelect(choice)}
             disabled={disabled}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg font-medium transition-colors text-left"
           >
-            {choice.text}
+            {choice.sutra}
           </button>
         ))}
       </div>
@@ -63,17 +81,17 @@ const PlayerSection: React.FC<PlayerProps> = ({
   currentQuestionDataIndex,
   setUserInput,
   handleRuleSubmit,
+  selectRuleSubmit,
   playerName,
   gameId
 }) => {
   // Sutraの選択肢を取得する関数
-  const getChoices = (): SutraChoice[] => {
-    return [
-      { id: "choice1", text: "Sample rule: 1.1.1" },
-      { id: "choice2", text: "Sample rule: 2.1.1" },
-      { id: "choice3", text: "Sample rule: 3.1.1" },
-      { id: "choice4", text: "Sample rule: 4.1.1" },
-    ];
+  const getChoices = async (): Promise<SutraChoice[]> => {
+    const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
+    return result.map(choice => ({
+      sutra: choice.sutra,
+      desc: choice.description,
+    }));
   };
 
   return (
@@ -86,14 +104,9 @@ const PlayerSection: React.FC<PlayerProps> = ({
       </div>
       <QuestionDisplay currentQuestion={questions[currentQuestionDataIndex]} />
       <div className="grid grid-cols-1 gap-4 mb-4">
-        {/* <RuleInputForm
-          gameState={gameState}
-          onRuleChange={setUserInput}
-          onSubmit={(questions: Question[]) => handleRuleSubmit(questions)}
-        /> */}
         <SutraChoicesComponent
           choices={getChoices()}
-          onSelect={(choice) => console.log(`Selected: ${choice.text}`)}
+          onSelect={selectRuleSubmit}
           disabled={gameState !== 'playing'}
         />
       </div>
@@ -112,7 +125,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
   pauseGame,
   resetGame,
   player1,
-  player2
+  player2,
 }) => {
   return (
     <div className="min-h-screen p-4">
@@ -121,6 +134,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       </h1>
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
+          <p>{gameId}</p>
           <PlayerSection 
             {...player1} 
             playerName="Player 1" 
