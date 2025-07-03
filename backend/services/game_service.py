@@ -16,6 +16,7 @@ from ..dto.game_dto import (
     GetChoicesResponse, SutraChoice
 )
 from vidyut.kosha import Kosha
+from vidyut.lipi import transliterate, Scheme
 
 
 class GameService(IGameService):
@@ -48,16 +49,16 @@ class GameService(IGameService):
             steps.append(
                 GameStep(
                     id=i + 1,
-                    from_word=from_word,
-                    to_word=to_word,
+                    from_word=self._convert(from_word, level=request.level),
+                    to_word=self._convert(to_word, level=request.level),
                     hint=None,
                 )
             )
             from_word = to_word  # Update from_word for next step
         session= GameSession(
             id=game_id,
-            root=dhatu.aupadeshika,
-            objective=prakriya.text,
+            root=self._convert(dhatu.aupadeshika, level=request.level),
+            objective=self._convert(prakriya.text, level=request.level),
             history=prakriya.history,
             current_step=1,  # Start at the first step
             started_at=datetime.now()
@@ -203,7 +204,7 @@ class GameService(IGameService):
         for sutra in all_choices:
             # Simple description (you can enhance this with actual rule descriptions)
             print(sutra)
-            choices.append(SutraChoice(sutra=sutra.code, description=sutra.text))
+            choices.append(SutraChoice(sutra=sutra.code, description=self._to_devanagari(sutra.text)))
         
         return GetChoicesResponse(choices=choices)
 
@@ -244,3 +245,14 @@ class GameService(IGameService):
         # Basic completion
         else:
             return "Bronze"
+    
+    def _convert(self, txt: str, level: str) -> str:
+        """Convert Sanskrit text to Devanagari script"""
+        # Placeholder for actual conversion logic
+        # This could use a library or custom mapping
+        if level == 'expert':
+            to_scheme = Scheme.Devanagari
+        else:
+            to_scheme = Scheme.Slp1
+            
+        return transliterate(txt, Scheme.Slp1, to_scheme)
