@@ -40,4 +40,5 @@ export interface PlayerProps {
   setUserInput: (input: string) => void;
   handleRuleSubmit: (questions: Question[]) => void;
   playerName: string;
+  gameId: string; // 追加: ゲームID
 }

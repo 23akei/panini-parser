@@ -8,8 +8,10 @@ import DifficultySelector from '../components/DifficultySelector';
 import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
+import HintsPanel from '../components/HintsPanel';
 
 interface HardGameMultiScreenProps {
+  gameId: string; // 追加: ゲームID
   gameState: 'stopped' | 'playing' | 'paused';
   timer: number;
   questions: Question[];
@@ -30,24 +32,20 @@ const PlayerSection: React.FC<PlayerProps> = ({
   currentQuestionDataIndex,
   setUserInput,
   handleRuleSubmit,
-  playerName
+  playerName,
+  gameId
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
+      <p>DEBUG: gameId = {gameId} </p>
+      <div className="flex items-center space-x-4">
+          <HPDisplay hitPoints={hitPoints} />
+      </div>
       <h2 className="text-xl font-bold mb-4 text-center">{playerName}</h2>
       <div className="flex justify-between items-center mb-4 border-b pb-3">
-        <div className="flex items-center space-x-4">
-          <HPDisplay hitPoints={hitPoints} />
-        </div>
       </div>
-
+      <QuestionDisplay currentQuestion={questions[currentQuestionDataIndex]} />
       <div className="grid grid-cols-1 gap-4 mb-4">
-        {/* <PlayArea
-          currentQuestion={currentQuestion}
-          currentQuestionData={currentQuestionData}
-          playerScore={playerScore}
-        /> */}
-
         <RuleInputForm
           gameState={gameState}
           onRuleChange={setUserInput}
@@ -59,6 +57,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
 };
 
 const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
+  gameId,
   gameState,
   timer,
   questions,
@@ -75,14 +74,15 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       <h1 className="text-2xl font-bold text-center mb-6">
         Sanskrit Grammar Game - Two Player Mode (Hard)
       </h1>
-        <QuestionDisplay currentQuestion={questions[currentQuestionDataIndex]} />
-        <GameControls
+        <p>DEBUG: Game ID: {gameId}</p> {/* デバッグ用にゲームIDを表示 */}
+
+        {/* <GameControls
           gameState={gameState}
           onStart={startGame}
           onPause={pauseGame}
           onReset={resetGame}
-        />
-        <Timer timer={timer} />
+        /> */}
+        {/* <Timer timer={timer} /> */}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
           <PlayerSection 
@@ -90,6 +90,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
             playerName="Player 1" 
             questions={questions || []}
             currentQuestionDataIndex={currentQuestionDataIndex}
+            gameId={gameId}
           />
         </div>
         
@@ -99,9 +100,11 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
             playerName="Player 2" 
             questions={questions || []}
             currentQuestionDataIndex={currentQuestionDataIndex}
+            gameId={gameId}
           />
         </div>
       </div>
+      {/* <HintsPanel />   */}
     </div>
   );
 };
