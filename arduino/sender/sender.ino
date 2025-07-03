@@ -73,7 +73,7 @@ void loop() {
     }
     if (currentMillis - lastDebounceTime[i] > DEBOUNCE_DELAY) {
       if (isPressed != currentButtonState[i]) {
-        sendButtonUpdate(i, isPressed ? 1 : 0)
+        sendButtonUpdate(i, isPressed ? 1 : 0);
         currentButtonState[i] = isPressed;
 //        sprintf(buf, "---> Button %s %s !", buttonChars[i], isPressed ? "pressed" : "released");
 //        Serial.println(buf); 
@@ -122,7 +122,7 @@ void sendStickUpdate(int direction) {
   Serial.println(buf);
 }
 
-void sendButtonUpdate(int button, isPressed) {
+void sendButtonUpdate(int button, int isPressed) {
   sprintf(buf, "%d,2,%d,%d", DEVICE_ID, button, isPressed); // e.g., 1,2,1,1
   Serial.println(buf);
 }
