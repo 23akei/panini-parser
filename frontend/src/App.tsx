@@ -79,7 +79,11 @@ const SanskritGrammarGame = () => {
     isVisible: false,
     isCorrect: false
   });
-  const [gameEndEffect, setGameEndEffect] = useState<{ isVisible: boolean; isVictory: boolean }>({
+  const [gameEndEffect1, setGameEndEffect1] = useState<{ isVisible: boolean; isVictory: boolean }>({
+    isVisible: false,
+    isVictory: false
+  });
+  const [gameEndEffect2, setGameEndEffect2] = useState<{ isVisible: boolean; isVictory: boolean }>({
     isVisible: false,
     isVictory: false
   });
@@ -142,30 +146,38 @@ const SanskritGrammarGame = () => {
     setAnswerFeedback2({ isVisible: false, isCorrect: false });
   };
 
-  const showGameEndEffect = (isVictory: boolean) => {
-    setGameEndEffect({ isVisible: true, isVictory });
+  const showGameEndEffect1 = (isVictory: boolean) => {
+    setGameEndEffect1({ isVisible: true, isVictory });
   };
 
-  const hideGameEndEffect = () => {
-    setGameEndEffect({ isVisible: false, isVictory: false });
+  const hideGameEndEffect1 = () => {
+    setGameEndEffect1({ isVisible: false, isVictory: false });
+  };
+
+  const showGameEndEffect2 = (isVictory: boolean) => {
+    setGameEndEffect2({ isVisible: true, isVictory });
+  };
+
+  const hideGameEndEffect2 = () => {
+    setGameEndEffect2({ isVisible: false, isVictory: false });
   };
 
   // ゲームクリア処理
   const handleGameWin = () => {
-    showGameEndEffect(true);
+    showGameEndEffect1(true);
     setTimeout(() => {
       setGameState('stopped');
       setCurrentScreen('gameClear');
-    }, 3000);
+    }, 1500);
   };
 
     // ゲームクリア処理
   const handleGameWin2 = () => {
-    showGameEndEffect(true);
+    showGameEndEffect2(true);
     setTimeout(() => {
       setGameState('stopped');
       setCurrentScreen('gameClear2');
-    }, 3000);
+    }, 1500);
   };
 
   // ゲーム開始処理
@@ -191,10 +203,10 @@ const SanskritGrammarGame = () => {
       setHitPoints(prev => prev - 1);
     } else {
       setHitPoints(0);
-      showGameEndEffect(false); // Show defeat effect
+      showGameEndEffect1(false); // Show defeat effect for Player 1
       setTimeout(() => {
         handleGameWin2(); // HPがなくなるとゲーム失敗
-      }, 3000);
+      }, 1500);
     }
   };
 
@@ -205,10 +217,10 @@ const SanskritGrammarGame = () => {
     } else {
       // プレイヤー2のゲーム失敗処理
       setHitPoints2(0);
-      showGameEndEffect(false); // Show defeat effect
+      showGameEndEffect2(false); // Show defeat effect for Player 2
       setTimeout(() => {
         handleGameWin(); // HPがなくなるとゲーム失敗
-      }, 3000);
+      }, 1500);
     }
 
   };
@@ -534,9 +546,17 @@ const SanskritGrammarGame = () => {
         />
 
         <GameEndEffects
-          isVisible={gameEndEffect.isVisible}
-          isVictory={gameEndEffect.isVictory}
-          onComplete={hideGameEndEffect}
+          isVisible={gameEndEffect1.isVisible}
+          isVictory={gameEndEffect1.isVictory}
+          onComplete={hideGameEndEffect1}
+          playerId={1}
+        />
+        
+        <GameEndEffects
+          isVisible={gameEndEffect2.isVisible}
+          isVictory={gameEndEffect2.isVictory}
+          onComplete={hideGameEndEffect2}
+          playerId={2}
         />
     </GameInputProvider>
   );
