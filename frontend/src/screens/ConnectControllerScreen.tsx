@@ -57,7 +57,7 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
           
           <div className="text-center mb-8">
             <div className="text-gray-600 mb-6">
-              各プレイヤーのコントローラーを接続してください
+              Please connect each player's controller
             </div>
             
             {/* プレイヤー接続ボタン */}
@@ -68,13 +68,13 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
                 {devices.player1.isConnected ? (
                   <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-green-700 font-semibold">
-                      ✓ 接続済み
+                      ✓ Connected
                     </div>
                   </div>
                 ) : (
                   <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-gray-500">
-                      未接続
+                      Not connected
                     </div>
                   </div>
                 )}
@@ -97,13 +97,13 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
                 {devices.player2.isConnected ? (
                   <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-green-700 font-semibold">
-                      ✓ 接続済み
+                      ✓ Connected
                     </div>
                   </div>
                 ) : (
                   <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-gray-500">
-                      未接続
+                      Not connected
                     </div>
                   </div>
                 )}
@@ -127,17 +127,17 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
             <div className="text-center py-4">
               <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mb-4">
                 <div className="text-green-700 font-semibold text-lg">
-                  ✓ 両方のプレイヤーが接続されました！
+                  ✓ Both players are connected!
                 </div>
                 <div className="text-green-600 text-sm mt-2">
-                  まもなくゲームが開始されます...
+                  The game will start soon...
                 </div>
               </div>
             </div>
           ) : (
             <div className="text-center py-4">
               <div className="text-gray-600">
-                両方のプレイヤーの接続をお待ちください
+                Please wait for both players to connect
               </div>
             </div>
           )}

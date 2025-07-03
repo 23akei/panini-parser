@@ -193,7 +193,7 @@ const SanskritGrammarGame = () => {
     if (hitPoints < maxHitPoints) {
       setHitPoints(prev => prev + 1);
     } else {
-      alert('HPは最大値です！');
+      alert('HP is at maximum!');
     }
   };
 
@@ -265,7 +265,7 @@ const SanskritGrammarGame = () => {
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore(prev => prev + 10);
-    alert('プレイヤー1: 正解！');
+    alert('Player 1: Correct!');
 
     damageHP2();
 
@@ -287,7 +287,7 @@ const SanskritGrammarGame = () => {
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore2(prev => prev + 10);
-    alert('プレイヤー2: 正解！');
+    alert('Player 2: Correct!');
 
     damageHP();
 
