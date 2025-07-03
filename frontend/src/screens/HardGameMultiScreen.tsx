@@ -26,8 +26,9 @@ const SutraChoicesComponent: React.FC<{
   choices: Promise<SutraChoice[]>;
   onSelect: (choice: SutraChoice) => void;
   disabled: boolean;
-  
-}> = ({ choices, onSelect, disabled }) => {
+  onHover?: (index: number) => void;
+  selectedIndex: number;
+}> = ({ choices, onSelect, disabled, onHover = null, selectedIndex = 0 }) => {
   const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
 
   useEffect(() => {
@@ -45,15 +46,20 @@ const SutraChoicesComponent: React.FC<{
   return (
     <div className="mt-4">
       <div className="grid grid-cols-2 gap-4 w-max mx-auto">
-        {choiceList.map(choice => (
+        {choiceList.map((choice, idx) => (
           <button
             key={choice.sutra}
-            onClick={() => onSelect(choice)}
+            onClick={() => onSelect(idx)}
+            onHover={() => onHover && onHover(idx)}
             disabled={disabled}
-            className={`text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
-              bg-transparent text-white border-white
+            className={`
+              text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
+              ${true && selectedIndex === idx
+                ? 'bg-[#00D1A8] text-pink-500 border-pink-500'
+                : 'bg-transparent text-white border-white'}
               hover:bg-[#00D1A8] hover:text-pink-500 hover:border-pink-500
-              disabled:opacity-50 disabled:cursor-not-allowed`}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
           >
             {choice.sutra}
           </button>
