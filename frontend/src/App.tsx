@@ -18,6 +18,8 @@ import QuestionDisplay from './components/QuestionDisplay';
 import PlayArea from './components/PlayArea';
 import RuleInputForm from './components/RuleInputForm';
 import DifficultySelector from './components/DifficultySelector';
+import AnswerFeedback from './components/AnswerFeedback';
+import GameEndEffects from './components/GameEndEffects';
 import { useGameOperations, useGameStatus } from './hooks/useGame';
 import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
@@ -68,6 +70,16 @@ const SanskritGrammarGame = () => {
   // Dynamic max hit points based on game step length
   const [maxHitPoints, setMaxHitPoints] = useState(MAXIMUM_HIT_POINTS);
 
+  // Effect states for visual and audio feedback
+  const [answerFeedback, setAnswerFeedback] = useState<{ isVisible: boolean; isCorrect: boolean }>({
+    isVisible: false,
+    isCorrect: false
+  });
+  const [gameEndEffect, setGameEndEffect] = useState<{ isVisible: boolean; isVictory: boolean }>({
+    isVisible: false,
+    isVictory: false
+  });
+
   /**
    * 関数定義
    */
@@ -109,16 +121,39 @@ const SanskritGrammarGame = () => {
     resetGame();
   };
 
+  // Helper functions for effects
+  const showAnswerFeedback = (isCorrect: boolean) => {
+    setAnswerFeedback({ isVisible: true, isCorrect });
+  };
+
+  const hideAnswerFeedback = () => {
+    setAnswerFeedback({ isVisible: false, isCorrect: false });
+  };
+
+  const showGameEndEffect = (isVictory: boolean) => {
+    setGameEndEffect({ isVisible: true, isVictory });
+  };
+
+  const hideGameEndEffect = () => {
+    setGameEndEffect({ isVisible: false, isVictory: false });
+  };
+
   // ゲームクリア処理
   const handleGameWin = () => {
-    setGameState('stopped');
-    setCurrentScreen('gameClear');
+    showGameEndEffect(true);
+    setTimeout(() => {
+      setGameState('stopped');
+      setCurrentScreen('gameClear');
+    }, 3000);
   };
 
     // ゲームクリア処理
   const handleGameWin2 = () => {
-    setGameState('stopped');
-    setCurrentScreen('gameClear2');
+    showGameEndEffect(true);
+    setTimeout(() => {
+      setGameState('stopped');
+      setCurrentScreen('gameClear2');
+    }, 3000);
   };
 
   // ゲーム開始処理
@@ -144,7 +179,10 @@ const SanskritGrammarGame = () => {
       setHitPoints(prev => prev - 1);
     } else {
       setHitPoints(0);
-      handleGameWin2(); // HPがなくなるとゲーム失敗
+      showGameEndEffect(false); // Show defeat effect
+      setTimeout(() => {
+        handleGameWin2(); // HPがなくなるとゲーム失敗
+      }, 3000);
     }
   };
 
@@ -155,7 +193,10 @@ const SanskritGrammarGame = () => {
     } else {
       // プレイヤー2のゲーム失敗処理
       setHitPoints2(0);
-      handleGameWin(); // HPがなくなるとゲーム失敗
+      showGameEndEffect(false); // Show defeat effect
+      setTimeout(() => {
+        handleGameWin(); // HPがなくなるとゲーム失敗
+      }, 3000);
     }
 
   };
@@ -236,6 +277,11 @@ const SanskritGrammarGame = () => {
 
   const selectRuleSubmit = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+
+    // Show answer feedback
+    showAnswerFeedback(result.correct);
+
+    // Continue immediately without waiting for feedback
     if (result.correct === true) {
       damageHP2();
       setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
@@ -247,8 +293,13 @@ const SanskritGrammarGame = () => {
     }
   }
 
-    const selectRuleSubmit2 = async (choice: SutraChoice) => {
+  const selectRuleSubmit2 = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+
+    // Show answer feedback
+    showAnswerFeedback(result.correct);
+
+    // Continue immediately without waiting for feedback
     if (result.correct === true) {
       damageHP();
       setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
@@ -454,6 +505,19 @@ const SanskritGrammarGame = () => {
         {currentScreen === 'results' && (
           <div>Results not implemented!</div>
         )}
+
+        {/* Effect Components */}
+        <AnswerFeedback
+          isVisible={answerFeedback.isVisible}
+          isCorrect={answerFeedback.isCorrect}
+          onComplete={hideAnswerFeedback}
+        />
+
+        <GameEndEffects
+          isVisible={gameEndEffect.isVisible}
+          isVictory={gameEndEffect.isVictory}
+          onComplete={hideGameEndEffect}
+        />
     </GameInputProvider>
   );
 };
