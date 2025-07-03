@@ -25,7 +25,7 @@ const HardGameScreen: React.FC<GameScreenProps> = ({
   changeDifficulty,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-center mb-8 border-b pb-4">
           <div className="flex items-center space-x-4">
