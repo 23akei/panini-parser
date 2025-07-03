@@ -9,7 +9,6 @@ export const parseSerialData = (text: string, playerId: 1 | 2): SerialData | nul
     if (parts.length < 2) return null;
 
     const data: SerialData = {
-      timestamp: Date.now(),
       playerId
     };
 

@@ -4,8 +4,8 @@ import { parseSerialData } from '../utils/parseSerialData';
 
 export const useWebSerialMultiDevice = () => {
   const [devices, setDevices] = useState<Devices>({
-    player1: { port: null, reader: null, isConnected: false, lastInput: null },
-    player2: { port: null, reader: null, isConnected: false, lastInput: null }
+    player1: { reader: null, isConnected: false, lastInput: null },
+    player2: { reader: null, isConnected: false, lastInput: null }
   });
 
   const readLoop = async (reader: ReadableStreamDefaultReader, playerId: 1 | 2) => {

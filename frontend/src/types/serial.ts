@@ -1,12 +1,10 @@
 export interface SerialData {
   direction?: 'up' | 'down' | 'left' | 'right';
-  button?: 'A' | 'B' | 'select' | 'start';
-  timestamp: number;
+  button?: 'A' | 'B' | 'C' | 'D';
   playerId: 1 | 2;
 }
 
 export interface DeviceConnection {
-  port: SerialPort | null;
   reader: ReadableStreamDefaultReader | null;
   isConnected: boolean;
   lastInput: SerialData | null;
