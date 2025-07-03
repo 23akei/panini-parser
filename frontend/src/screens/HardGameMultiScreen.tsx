@@ -134,7 +134,6 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       </h1>
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
-          <p>{gameId}</p>
           <PlayerSection 
             {...player1} 
             playerName="Player 1" 
