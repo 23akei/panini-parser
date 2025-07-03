@@ -168,7 +168,7 @@ const SanskritGrammarGame = () => {
     setTimeout(() => {
       setGameState('stopped');
       setCurrentScreen('gameClear');
-    }, 1500);
+    }, 3000);
   };
 
     // ゲームクリア処理
@@ -177,7 +177,7 @@ const SanskritGrammarGame = () => {
     setTimeout(() => {
       setGameState('stopped');
       setCurrentScreen('gameClear2');
-    }, 1500);
+    }, 3000);
   };
 
   // ゲーム開始処理
@@ -206,7 +206,7 @@ const SanskritGrammarGame = () => {
       showGameEndEffect1(false); // Show defeat effect for Player 1
       setTimeout(() => {
         handleGameWin2(); // HPがなくなるとゲーム失敗
-      }, 1500);
+      }, 3000);
     }
   };
 
@@ -220,7 +220,7 @@ const SanskritGrammarGame = () => {
       showGameEndEffect2(false); // Show defeat effect for Player 2
       setTimeout(() => {
         handleGameWin(); // HPがなくなるとゲーム失敗
-      }, 1500);
+      }, 3000);
     }
 
   };
