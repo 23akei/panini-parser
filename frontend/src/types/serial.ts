@@ -1,6 +1,6 @@
 export interface SerialData {
   direction?: 'up' | 'down' | 'left' | 'right';
-  button?: 'A' | 'B' | 'C' | 'D';
+  button?: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'k';
   playerId: 1 | 2;
 }
 
