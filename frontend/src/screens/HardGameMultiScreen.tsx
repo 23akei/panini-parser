@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Timer from '../components/Timer';
 import GameControls from '../components/GameControls';
 import QuestionDisplay from '../components/QuestionDisplay';
@@ -88,17 +88,21 @@ const PlayerSection: React.FC<PlayerProps> = ({
   handleRuleSubmit,
   selectRuleSubmit,
   playerName,
-  gameId
+  gameId,
+  maxHitPoints
 }) => {
   // Sutraの選択肢を取得する関数
-  const getChoices = async (): Promise<SutraChoice[]> => {
-    const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
-    return result.map(choice => ({
-      sutra: choice.sutra,
-      desc: choice.description,
-      answer: choice.answer || false, // answerが存在しない場合はfalseとする
-    }));
-  };
+  const choices = useMemo(() => {
+    const getChoices = async (): Promise<SutraChoice[]> => {
+      const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
+      return result.map(choice => ({
+        sutra: choice.sutra,
+        desc: choice.description,
+        answer: choice.answer || false,
+      }));
+    };
+    return getChoices();
+  }, [gameId, currentQuestionDataIndex]);
 
   return (
     <div className="h-screen rounded-lg p-4 border-[12px] border-pink-400 bg-[#001f3f]">
@@ -111,7 +115,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       </h2>
 
       <div className="flex items-center justify-center space-x-4 w-full">
-        <HPDisplay hitPoints={hitPoints} />
+        <HPDisplay hitPoints={hitPoints} maxHitPoints={maxHitPoints} />
       </div>
 
       <div className="flex items-center justify-center space-x-4 w-full">
@@ -120,7 +124,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       <div className="flex justify-center w-full">
         <div className="grid grid-cols-1 gap-4 w-max">
           <SutraChoicesComponent
-            choices={getChoices()}
+            choices={choices}
             onSelect={selectRuleSubmit}
             disabled={gameState !== 'playing'}
           />
@@ -145,6 +149,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
 }) => {
   return (
     <div className="h-screen flex bg-[#001f3f] p-4 gap-6 overflow-hidden">
+      <audio src="main.m4a" autoPlay loop id="myAudio"></audio>
       <div className="flex-1 h-full">
         <PlayerSection 
           {...player1}
