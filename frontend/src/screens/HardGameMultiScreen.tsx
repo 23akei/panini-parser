@@ -136,7 +136,7 @@ const PlayerSection = ({
     } else if (device.lastInput.direction === 'left') {
       setSelectedIndex(selectedIndex => (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.button === 'a') {
+    } else if (device.lastInput.button === 'b') {
       // 'a'ボタンでsubmit
       selectRuleSubmit(choiceList[selectedIndex]);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
