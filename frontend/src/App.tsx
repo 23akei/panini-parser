@@ -64,6 +64,8 @@ const SanskritGrammarGame = () => {
   const [hitPoints2, setHitPoints2] = useState(MAXIMUM_HIT_POINTS);
   const [playerScore2, setPlayerScore2] = useState(INIT_POINT);
   const [userInput2, setUserInput2] = useState<string>('');
+  // Dynamic max hit points based on game step length
+  const [maxHitPoints, setMaxHitPoints] = useState(MAXIMUM_HIT_POINTS);
 
   /**
    * 関数定義
@@ -71,6 +73,13 @@ const SanskritGrammarGame = () => {
   // Map UI difficulty to API difficulty
   const mapDifficultyToApiLevel = (difficulty: 'EASY' | 'HARD'): string => {
     return difficulty === 'EASY' ? 'beginner' : 'expert';
+  };
+
+  // Calculate maximum hit points based on game step length
+  const calculateMaxHitPoints = (gameStepLength: number): number => {
+    // Set max hit points to be proportional to game length
+    // For balance: fewer steps = fewer lives, more steps = more lives
+    return Math.max(2, Math.floor(gameStepLength * 0.6)); // At least 2 lives, scales with game length
   };
 
   const pauseGame = () => {
@@ -84,8 +93,8 @@ const SanskritGrammarGame = () => {
   // 問題データを取得する関数
   const getQuestions = async (): Promise<{ value1: Question[]; value2: string }> => {
     const apiLevel = mapDifficultyToApiLevel(difficulty);
-    // Set game length to balance with hit points (2 lives = 3 questions for fair gameplay)
-    const gameLength = MAXIMUM_HIT_POINTS + 1;
+    // Set game length (configurable based on difficulty or user preference)
+    const gameLength = 5; // Default game length
     const startGameResult = await ApiClient.startGame(apiLevel, gameLength)
     return {
       value1: mapStepsToQuestions(startGameResult),
@@ -121,7 +130,7 @@ const SanskritGrammarGame = () => {
   };
 
   const healHP = () => {
-    if (hitPoints < MAXIMUM_HIT_POINTS) {
+    if (hitPoints < maxHitPoints) {
       setHitPoints(prev => prev + 1);
     } else {
       alert('HPは最大値です！');
@@ -151,7 +160,7 @@ const SanskritGrammarGame = () => {
   };
 
   const resetHP = () => {
-    setHitPoints(MAXIMUM_HIT_POINTS);
+    setHitPoints(maxHitPoints);
   };
 
   const handlePauseGame = () => {
@@ -166,13 +175,17 @@ const SanskritGrammarGame = () => {
     setQuestions(result.value1);
     setGameId(result.value2);
     setCurrentQuestionDataIndex(0);
-    //const initialQ = questions[0];
-    //setCurrentQuestionData(initialQ);
+    
+    // Calculate max hit points based on game step length
+    const gameStepLength = result.value1.length;
+    const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
+    setMaxHitPoints(calculatedMaxHitPoints);
+    
     // プレイヤー1用のリセット
-    setHitPoints(MAXIMUM_HIT_POINTS);
+    setHitPoints(calculatedMaxHitPoints);
     setPlayerScore(INIT_POINT);
     // プレイヤー2用のリセット
-    setHitPoints2(MAXIMUM_HIT_POINTS);
+    setHitPoints2(calculatedMaxHitPoints);
     setPlayerScore2(INIT_POINT);
   };
 
@@ -305,7 +318,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player",
               selectRuleSubmit: selectRuleSubmit,
-              gameId: gameId
+              gameId: gameId,
+              maxHitPoints: maxHitPoints
             }}
           />
         ) : (
@@ -329,7 +343,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player",
               selectRuleSubmit: selectRuleSubmit,
-              gameId: gameId
+              gameId: gameId,
+              maxHitPoints: maxHitPoints
             }}
           />
         )
@@ -357,7 +372,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player 1",
               selectRuleSubmit: selectRuleSubmit,
-              gameId: gameId /* gameIdを追加 */
+              gameId: gameId, /* gameIdを追加 */
+              maxHitPoints: maxHitPoints
             }}
             player2={{
               gameState: gameState,
@@ -369,7 +385,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit2,
               playerName: "Player 2",
               selectRuleSubmit: selectRuleSubmit2,
-              gameId: gameId /* gameIdを追加 */
+              gameId: gameId, /* gameIdを追加 */
+              maxHitPoints: maxHitPoints
             }}
           />
         ) : (
@@ -393,7 +410,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player 1",
               selectRuleSubmit: selectRuleSubmit,
-              gameId: gameId
+              gameId: gameId,
+              maxHitPoints: maxHitPoints
             }}
             player2={{
               gameState: gameState,
@@ -405,7 +423,8 @@ const SanskritGrammarGame = () => {
               handleRuleSubmit: handleRuleSubmit2,
               playerName: "Player 2",
               selectRuleSubmit: selectRuleSubmit2,
-              gameId: gameId
+              gameId: gameId,
+              maxHitPoints: maxHitPoints
             }}
           />
         )

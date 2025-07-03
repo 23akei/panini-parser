@@ -43,4 +43,5 @@ export interface PlayerProps {
   selectRuleSubmit: (choice: SutraChoice) => void; // ルール選択のサブミット関数
   playerName: string;
   gameId: string; // 追加: ゲームID
+  maxHitPoints: number; // 追加: 動的な最大HP
 }

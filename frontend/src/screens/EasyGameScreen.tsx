@@ -5,7 +5,6 @@ import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import { ApiClient } from '../api/client';
-import { MAXIMUM_HIT_POINTS } from '../constants/appConstants';
 
 // Sutra選択肢の型定義
 interface SutraChoice {
@@ -79,7 +78,8 @@ const PlayerSection: React.FC<PlayerProps> = ({
   handleRuleSubmit,
   selectRuleSubmit,
   playerName,
-  gameId
+  gameId,
+  maxHitPoints
 }) => {
   // Sutraの選択肢を取得する関数
   const getChoices = async (): Promise<SutraChoice[]> => {
@@ -101,7 +101,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       </h2>
 
       <div className="flex items-center justify-center space-x-4 w-full">
-        <HPDisplay hitPoints={hitPoints} maxHitPoints={MAXIMUM_HIT_POINTS} />
+        <HPDisplay hitPoints={hitPoints} maxHitPoints={maxHitPoints} />
       </div>
 
       <div className="flex items-center justify-center space-x-4 w-full">
