@@ -121,6 +121,11 @@ const SanskritGrammarGame = () => {
     setCurrentScreen('gameClear2');
   };
 
+  const handleGameFail = () => {
+    setGameState('stopped');
+    setCurrentScreen('gameFailed');
+  };
+
   // ゲーム開始処理
   const startGame = () => {
     // setQuestions(getQuestions());
@@ -138,7 +143,7 @@ const SanskritGrammarGame = () => {
     }
   };
 
-  // ダメージ処理の修正
+  // プレイヤー1のダメージ処理
   const damageHP = () => {
     if (hitPoints > 1) {
       setHitPoints(prev => prev - 1);
@@ -157,8 +162,16 @@ const SanskritGrammarGame = () => {
       setHitPoints2(0);
       handleGameWin(); // HPがなくなるとゲーム失敗
     }
-
   };
+
+  const singleDamageHP = () => {
+    if (hitPoints > 1) {
+      setHitPoints(prev => prev - 1);
+    } else {
+      setHitPoints(0);
+      handleGameFail(); // HPがなくなるとゲーム失敗
+    }
+  }
 
   const resetHP = () => {
     setHitPoints(maxHitPoints);
@@ -238,25 +251,37 @@ const SanskritGrammarGame = () => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP2();
+      if (!result.next_step_id) {
+        handleGameWin();
+      }
       setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
     } else {
       damageHP();
     }
-    if (!result.next_step_id) {
-      handleGameWin();
-    }
   }
 
-    const selectRuleSubmit2 = async (choice: SutraChoice) => {
+  const selectRuleSubmit2 = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP();
+      if (!result.next_step_id) {
+        handleGameWin2();
+      }
       setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
     } else {
       damageHP2();
     }
-    if (!result.next_step_id) {
-      handleGameWin2();
+  }
+
+  const selectRuleSubmitSinglePlay = async (choice: SutraChoice) => {
+    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+    if (result.correct === true) {
+      if (!result.next_step_id) {
+        handleGameWin();
+      }
+      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
+    } else {
+      singleDamageHP(); // プレイヤー1のHPを減らす
     }
   }
 
@@ -316,7 +341,7 @@ const SanskritGrammarGame = () => {
               setUserInput: setUserInput,
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player",
-              selectRuleSubmit: selectRuleSubmit,
+              selectRuleSubmit: selectRuleSubmitSinglePlay,
               gameId: gameId,
               maxHitPoints: maxHitPoints
             }}
@@ -341,7 +366,7 @@ const SanskritGrammarGame = () => {
               setUserInput: setUserInput,
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player",
-              selectRuleSubmit: selectRuleSubmit,
+              selectRuleSubmit: selectRuleSubmitSinglePlay,
               gameId: gameId,
               maxHitPoints: maxHitPoints
             }}
