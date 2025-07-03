@@ -35,12 +35,10 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
             disabled={gameState !== 'playing'}
             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition-colors"
           >
-
+            Submit
           </button>
         </div>
       </div>
-
-      <HintsPanel />
     </div>
   );
 };
