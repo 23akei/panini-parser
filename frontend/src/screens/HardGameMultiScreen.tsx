@@ -87,12 +87,6 @@ const PlayerSection: React.FC<PlayerProps> = ({
 }) => {
   // Sutraの選択肢を取得する関数
   const getChoices = async (): Promise<SutraChoice[]> => {
-    // return [
-    //   { sutra: "choice1", desc: "Sample rule: 1.1.1" },
-    //   { sutra: "choice2", desc: "Sample rule: 2.1.1" },
-    //   { sutra: "choice3", desc: "Sample rule: 3.1.1" },
-    //   { sutra: "choice4", desc: "Sample rule: 4.1.1" },
-    // ];
     const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
     return result.map(choice => ({
       sutra: choice.sutra,

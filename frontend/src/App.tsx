@@ -82,42 +82,6 @@ const SanskritGrammarGame = () => {
   
   // 問題データを取得する関数
   const getQuestions = async (): Promise<{ value1: Question[]; value2: string }> => {
-    // 将来的には外部APIやサービスから取得する予定
-    // return {
-    //   value1: [
-    //     {
-    //       id: 1,
-    //       from_word: 'word1',
-    //       to_word: 'word2',
-    //       hint: 'hint_1_to_2'
-    //     },
-    //     {
-    //       id: 2,
-    //       from_word: 'word2',
-    //       to_word: 'word3',
-    //       hint: 'hint_2_to_3'
-    //     },
-    //     {
-    //       id: 3,
-    //       from_word: 'word3',
-    //       to_word: 'word4',
-    //       hint: 'hint_3_to_4'
-    //     },
-    //     {
-    //       id: 4,
-    //       from_word: 'word4',
-    //       to_word: 'word5',
-    //       hint: 'hint_4_to_5'
-    //     },
-    //     {
-    //       id: 5,
-    //       from_word: 'word5',
-    //       to_word: '',
-    //       hint: 'hint_5_to_end'
-    //     }
-    // ],
-    // value2: 'game_id_12345' // 仮のゲームID
-    // };
     const startGameResult = await ApiClient.startGame()
     return {
       value1: mapStepsToQuestions(startGameResult),
@@ -142,12 +106,6 @@ const SanskritGrammarGame = () => {
     setGameState('stopped');
     setCurrentScreen('gameClear2');
   };
-
-  // ゲーム失敗処理
-  // const handleGameFail = () => {
-  //   setGameState('stopped');
-  //   setCurrentScreen('gameFailed');
-  // };
 
   // ゲーム開始処理
   const startGame = () => {
