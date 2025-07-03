@@ -129,12 +129,16 @@ const PlayerSection = ({
   useEffect(() => {
     if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
     if (choiceList.length === 0) return;
+
+    let answerIndex = choiceList.findIndex(choice => choice.answer);
+    let nextAnswerIndex = answerIndex > selectedIndex ? selectedIndex + 1 : (answerIndex < selectedIndex ? selectedIndex - 1 : answerIndex);
+
     // 方向入力で選択肢移動
     if (device.lastInput.direction === 'right') {
-      setSelectedIndex(selectedIndex => (selectedIndex + 1) % choiceList.length);
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.direction === 'left') {
-      setSelectedIndex(selectedIndex => (selectedIndex - 1 + choiceList.length) % choiceList.length);
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'b') {
       // 'a'ボタンでsubmit
