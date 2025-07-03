@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useGameInput } from '../contexts/GameInputContext';
 
 interface ConnectControllerScreenProps {
   onConnectComplete: () => void;
@@ -7,12 +8,18 @@ interface ConnectControllerScreenProps {
 const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onConnectComplete }) => {
   const [player1Connected, setPlayer1Connected] = useState(false);
   const [player2Connected, setPlayer2Connected] = useState(false);
+  const { connect } = useGameInput();
+
+  const { devices } = useGameInput(); // devicesは現在の接続状態を取得
+  console.log(devices.player1.lastInput);
 
   const handlePlayer1Connect = () => {
+    connect(1);
     setPlayer1Connected(true);
   };
 
   const handlePlayer2Connect = () => {
+    connect(2);
     setPlayer2Connected(true);
   };
 
