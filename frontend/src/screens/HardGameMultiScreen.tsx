@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import Timer from '../components/Timer';
 import GameControls from '../components/GameControls';
 import QuestionDisplay from '../components/QuestionDisplay';
@@ -21,15 +22,27 @@ export type { SutraChoice };
 
 // Sutra選択肢を表示するコンポーネント
 const SutraChoicesComponent: React.FC<{
-  choices: SutraChoice[];
+  choices: Promise<SutraChoice[]>;
   onSelect: (choice: SutraChoice) => void;
   disabled: boolean;
 }> = ({ choices, onSelect, disabled }) => {
+  const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
+
+  useEffect(() => {
+    async () => {
+      try {
+        const result = await choices;
+        setChoiceList(result);
+      } catch (err) {
+        console.error('Failed to fetch sutra choices:', err);
+      }
+  }});
+
   return (
     <div className="mt-4 space-y-2">
       <h3 className="font-semibold text-gray-700">Select rule:</h3>
       <div className="grid grid-cols-1 gap-2">
-        {choices.map(choice => (
+        {choiceList.map(choice => (
           <button
             key={choice.sutra}
             onClick={() => onSelect(choice)}
@@ -78,7 +91,12 @@ const PlayerSection: React.FC<PlayerProps> = ({
     //   { sutra: "choice3", desc: "Sample rule: 3.1.1" },
     //   { sutra: "choice4", desc: "Sample rule: 4.1.1" },
     // ];
-    return await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex);
+    console.log(gameId)
+    const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
+    return result.map(choice => ({
+      sutra: choice.sutra,
+      desc: choice.description,
+    }));
   };
 
   return (
@@ -121,6 +139,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       </h1>
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
+          <p>{gameId}</p>
           <PlayerSection 
             {...player1} 
             playerName="Player 1" 
