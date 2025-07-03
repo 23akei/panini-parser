@@ -21,9 +21,9 @@ export const parseSerialData = (text: string, devicePlayerId: 1 | 2): SerialData
     if (type === 1) {
       // Stick input: deviceId,1,direction
       const direction = parseInt(parts[2]);
-      // Arduino direction mapping: 0=right, 1=up, 2=left, 3=down
-      const directionMap = ['right', 'up', 'left', 'down'] as const;
-      if (direction >= 0 && direction <= 3) {
+      // Arduino direction mapping: neutral(0) right(1) left(2) down(3) up(4)
+      const directionMap = ['neutral', 'right', 'left', 'down', 'up'] as const;
+      if (direction >= 0 && direction <= 4) {
         data.direction = directionMap[direction];
       }
     } else if (type === 2) {
