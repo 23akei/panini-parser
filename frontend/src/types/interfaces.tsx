@@ -19,11 +19,11 @@ export interface GameScreenProps {
   gameState: 'stopped' | 'playing' | 'paused';
   timer: number;
   hitPoints: number;
-  currentQuestion: string;
+  currentQuestion?: Question;
   userRule: string;
   playerScore: number;
   difficulty: 'EASY' | 'HARD';
-  currentQuestionData: Question;
+  currentQuestionData?: Question;
   startGame: () => void;
   pauseGame: () => void;
   resetGame: () => void;
@@ -43,4 +43,5 @@ export interface PlayerProps {
   selectRuleSubmit: (choice: SutraChoice) => void; // ルール選択のサブミット関数
   playerName: string;
   gameId: string; // 追加: ゲームID
+  maxHitPoints: number; // 追加: 動的な最大HP
 }
