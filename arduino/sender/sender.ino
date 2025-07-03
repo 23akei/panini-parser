@@ -65,7 +65,6 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  bool hasChanged = false;
 
   for (int i = 2; i < 9; ++i) {
     bool isPressed = !digitalRead(i);
@@ -74,8 +73,8 @@ void loop() {
     }
     if (currentMillis - lastDebounceTime[i] > DEBOUNCE_DELAY) {
       if (isPressed != currentButtonState[i]) {
+        sendButtonUpdate(i, isPressed ? 1 : 0)
         currentButtonState[i] = isPressed;
-        hasChanged = true;
 //        sprintf(buf, "---> Button %s %s !", buttonChars[i], isPressed ? "pressed" : "released");
 //        Serial.println(buf); 
       }
@@ -101,8 +100,12 @@ void loop() {
   }
 
   if (lastDirection != direction) {
+    for (int i = 0; i < 4; ++i) {
+      if (!(lastDirection >> i & 1) && (direction >> i & 1)) {
+        sendStickUpdate(i);
+      }
+    }
     lastDirection = direction;
-    hasChanged = true;
   }
 
 //  printDirection(direction);
@@ -110,15 +113,17 @@ void loop() {
 //  Serial.println(buf);
 //  sprintf(buf, "Y = %d", stickY);
 //  Serial.println(buf);
-
-  if (hasChanged) printData(direction, currentButtonState, sizeof(currentButtonState) / sizeof(bool));
 }
 
 
-void printData(byte dir, bool *currentButtonState, int buttonCnt) {
-  int buttonBits = 0;
-  for (int i = 0; i < buttonCnt; ++i) buttonBits |= currentButtonState[i] << i;
-  sprintf(buf, "%d,%u,%u", DEVICE_ID, dir, buttonBits); // e.g., 1,4,48
+// direction: up(1) right(2) down(3) left(4)
+void sendStickUpdate(int direction) {
+  sprintf(buf, "%d,1,%d", DEVICE_ID, direction); // e.g., 1,1,2
+  Serial.println(buf);
+}
+
+void sendButtonUpdate(int button, isPressed) {
+  sprintf(buf, "%d,2,%d,%d", DEVICE_ID, button, isPressed); // e.g., 1,2,1,1
   Serial.println(buf);
 }
 
