@@ -178,15 +178,15 @@ const SanskritGrammarGame = () => {
     setCurrentQuestionDataIndex(0);
 
     // Calculate max hit points based on game step length
-    const gameStepLength = result.value1.length;
-    const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
-    setMaxHitPoints(calculatedMaxHitPoints);
+    // const gameStepLength = result.value1.length;
+    // const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
+    // setMaxHitPoints(calculatedMaxHitPoints);
 
     // プレイヤー1用のリセット
-    setHitPoints(calculatedMaxHitPoints);
+    setHitPoints(MAXIMUM_HIT_POINTS);
     setPlayerScore(INIT_POINT);
     // プレイヤー2用のリセット
-    setHitPoints2(calculatedMaxHitPoints);
+    setHitPoints2(MAXIMUM_HIT_POINTS);
     setPlayerScore2(INIT_POINT);
   };
 
@@ -247,7 +247,7 @@ const SanskritGrammarGame = () => {
     }
   }
 
-    const selectRuleSubmit2 = async (choice: SutraChoice) => {
+  const selectRuleSubmit2 = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP();
