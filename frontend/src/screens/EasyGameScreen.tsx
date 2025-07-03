@@ -134,12 +134,15 @@ const PlayerSection: React.FC<PlayerProps> = ({
     if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
     if (choiceList.length === 0) return;
 
+    let answerIndex = choiceList.findIndex(choice => choice.answer);
+    let nextAnswerIndex = answerIndex > selectedIndex ? selectedIndex + 1 : (answerIndex < selectedIndex ? selectedIndex - 1 : answerIndex);
+
     // Navigation with directional input
     if (device.lastInput.direction === 'right') {
-      setSelectedIndex((selectedIndex + 1) % choiceList.length);
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(1);
     } else if (device.lastInput.direction === 'left') {
-      setSelectedIndex((selectedIndex - 1 + choiceList.length) % choiceList.length);
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(1);
     } else if (device.lastInput.button === 'b') {
       // Submit selection
