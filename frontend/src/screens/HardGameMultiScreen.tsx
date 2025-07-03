@@ -39,8 +39,8 @@ const SutraChoicesComponent = ({
   selectedIndex
 }: SutraChoicesComponentProps) => {
   return (
-    <div className="mt-4">
-      <div className="grid grid-cols-2 gap-4 w-max mx-auto">
+    <div className="mt-4 w-full">
+      <div className="flex flex-col gap-3 max-w-4xl mx-auto">
         {choices.map((choice: SutraChoice, idx: number) => (
           <button
             key={choice.sutra}
@@ -48,7 +48,7 @@ const SutraChoicesComponent = ({
             onMouseOver={() => onHover && onHover(idx)}
             disabled={disabled}
             className={`
-              text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
+              flex items-center gap-4 py-3 px-4 rounded-lg font-medium transition-colors border-2 text-left
               ${selectedIndex === idx
                 ? 'bg-[#00D1A8] text-pink-500 border-pink-500'
                 : 'bg-transparent text-white border-white'}
@@ -56,7 +56,12 @@ const SutraChoicesComponent = ({
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
-            {choice.sutra}
+            <div className="text-2xl font-bold min-w-[120px] text-center">
+              {choice.sutra}
+            </div>
+            <div className="text-lg flex-1">
+              {choice.desc}
+            </div>
           </button>
         ))}
       </div>
@@ -133,11 +138,11 @@ const PlayerSection = ({
     let answerIndex = choiceList.findIndex(choice => choice.answer);
     let nextAnswerIndex = answerIndex > selectedIndex ? selectedIndex + 1 : (answerIndex < selectedIndex ? selectedIndex - 1 : answerIndex);
 
-    // 方向入力で選択肢移動
-    if (device.lastInput.direction === 'right') {
+    // 方向入力で選択肢移動 (縦に並んだ選択肢用)
+    if (device.lastInput.direction === 'down' || device.lastInput.direction === 'right') {
       setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.direction === 'left') {
+    } else if (device.lastInput.direction === 'up' || device.lastInput.direction === 'left') {
       setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'b') {

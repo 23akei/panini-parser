@@ -47,8 +47,8 @@ const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({
 }, [choices]);
 
   return (
-    <div className="mt-4">
-      <div className="grid grid-cols-2 gap-4 w-max mx-auto">
+    <div className="mt-4 w-full">
+      <div className="flex flex-col gap-3 max-w-4xl mx-auto">
         {choiceList.map((choice, idx) => (
           <button
             key={choice.sutra}
@@ -56,7 +56,7 @@ const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({
             onMouseOver={() => onHover && onHover(idx)}
             disabled={disabled}
             className={`
-              text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
+              flex items-center gap-4 py-3 px-4 rounded-lg font-medium transition-colors border-2 text-left
               ${selectedIndex === idx
                 ? 'bg-[#00D1A8] text-pink-500 border-pink-500'
                 : 'bg-transparent text-white border-white'}
@@ -64,7 +64,12 @@ const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
-            {choice.sutra}
+            <div className="text-2xl font-bold min-w-[120px] text-center">
+              {choice.sutra}
+            </div>
+            <div className="text-lg flex-1">
+              {choice.desc}
+            </div>
           </button>
         ))}
       </div>
@@ -141,11 +146,11 @@ const PlayerSection: React.FC<PlayerSectionProps> = ({
     if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
     if (choiceList.length === 0) return;
 
-    // Navigation with directional input
-    if (device.lastInput.direction === 'right') {
+    // Navigation with directional input (vertical layout)
+    if (device.lastInput.direction === 'down' || device.lastInput.direction === 'right') {
       setSelectedIndex((selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.direction === 'left') {
+    } else if (device.lastInput.direction === 'up' || device.lastInput.direction === 'left') {
       setSelectedIndex((selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'b') {
