@@ -6,28 +6,56 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectMode }) => {
   return (
-    <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Sanskrit Grammar Game</h1>
-        <p className="text-center mb-8 text-lg text-gray-600">
-          Select your mode to start playing!
-        </p>
-        
-        <div className="space-y-4">
-          <button 
-            onClick={() => onSelectMode('single')}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors"
-          >
-            Single Player
-          </button>
-          
-          <button 
-            onClick={() => onSelectMode('multi')}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors"
-          >
-            2-Player Mode
-          </button>
-        </div>
+    <div className="min-h-screen flex border-[12px] border-pink-400 bg-[#001f3f]">
+      {/* left */}
+      <div className="w-1/2 flex items-center justify-center">
+        <img
+          src="main.png"
+          alt="Panini Game"
+          className="w-[80%] max-w-[500px] h-auto object-contain scale-x-[-1]"
+        />
+      </div>
+
+      {/* right */}
+      <div className="w-1/2 flex flex-col items-center justify-center p-8">
+        <h1 className="text-7xl font-extrabold mb-4 text-yellow-400 text-center stroke-white">
+          Pāṇini Krīḍa
+        </h1>
+        <h2 className="text-4xl font-semibold mb-6 text-yellow-400 text-center stroke-white">
+          पाणिनि क्रीडा
+        </h2>
+
+      <div className="flex flex-nowrap justify-center space-x-6">
+        {/* Single Player */}
+        <button
+          onClick={() => onSelectMode('single')}
+          className="relative group"
+        >
+          <img
+            src="single-icon.png"
+            alt="Single Player Icon"
+            className="w-65 h-45 object-cover rounded-xl"
+          />
+          <span className="absolute inset-0 flex flex-col items-center justify-center text-pink-500 text-2xl font-bold text-center leading-snug">
+            <br />एकाकी<br />Solo
+          </span>
+        </button>
+
+        {/* 2-Player Mode */}
+        <button
+          onClick={() => onSelectMode('multi')}
+          className="relative group"
+        >
+          <img
+            src="multi-icon.png"
+            alt="Multiplayer Icon"
+            className="w-65 h-45 object-cover rounded-xl"
+          />
+          <span className="absolute inset-0 flex flex-col items-center justify-center text-pink-500 text-2xl font-bold text-center leading-snug">
+            <br />मेलनम्‌<br />Battle
+          </span>
+        </button>
+      </div>
       </div>
     </div>
   );
