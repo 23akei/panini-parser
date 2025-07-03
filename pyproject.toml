@@ -23,6 +23,7 @@ exclude = ["frontend*"]
 [project.scripts]
 panini-cli = "cli.main:app"
 panini-backend = "backend.main:start_server"
+panini-download-data = "backend.download_data:main"
 
 [project.optional-dependencies]
 dev = [

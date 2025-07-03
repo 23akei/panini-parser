@@ -34,6 +34,9 @@ panini-parser/
 # Install Python dependencies (includes Vidyut parser)
 uv sync
 
+# Download Vidyut data (required for Sanskrit parsing)
+uv run panini-download-data
+
 # Install frontend dependencies
 cd frontend && pnpm install
 ```
