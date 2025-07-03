@@ -10,13 +10,14 @@ import type {
   SubmitAnswerResponse,
   GameStatusResponse,
   FinishGameResponse,
-  RuleDetailsResponse
+  RuleDetailsResponse,
+  GetChoicesResponse
 } from './generated';
 
 // API Configuration
 const getApiConfig = () => {
   const basePath = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-  
+
   return new Configuration({
     basePath,
     // Add default headers if needed
@@ -54,14 +55,14 @@ export class ApiClient {
    * Submit an answer for a game step
    */
   static async submitAnswer(
-    gameId: string, 
-    stepId: number, 
+    gameId: string,
+    stepId: number,
     request: SubmitAnswerRequest
   ): Promise<SubmitAnswerResponse> {
     try {
       const response = await gameApi.submitAnswerApiV1GameGameIdStepStepIdAnswerPost(
-        gameId, 
-        stepId, 
+        gameId,
+        stepId,
         request
       );
       return response.data;
@@ -110,9 +111,9 @@ export class ApiClient {
     }
   }
 
-  static async getSutraChoices(gameId: string, stepId: number): Promise< Array<{ sutra: string; desc: string }> > {
+  static async getSutraChoices(gameId: string, stepId: number): Promise<GetChoicesResponse> {
     try {
-      const response = await gameApi.getSutraChoicesApiV1GameGameIdStepStepIdChoicesGet(gameId, stepId);
+      const response = await gameApi.getChoicesApiV1GameGameIdStepStepIdChoicesGet(gameId, stepId);
       return response.data;
     } catch (error) {
       console.error('Failed to get sutra choices:', error);
