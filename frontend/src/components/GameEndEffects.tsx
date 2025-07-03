@@ -195,7 +195,7 @@ const GameEndEffects: React.FC<GameEndEffectsProps> = ({
                 transition: { delay: 1 }
               }}
             >
-              {isVictory ? '素晴らしい！' : '次回頑張ろう！'}
+              {isVictory ? 'Excellent!' : 'Try again!'}
             </motion.p>
           </motion.div>
 
