@@ -18,6 +18,9 @@ import QuestionDisplay from './components/QuestionDisplay';
 import PlayArea from './components/PlayArea';
 import RuleInputForm from './components/RuleInputForm';
 import DifficultySelector from './components/DifficultySelector';
+import AnswerFeedback from './components/AnswerFeedback';
+import GameEndEffects from './components/GameEndEffects';
+import HPChangeEffect from './components/HPChangeEffect';
 import { useGameOperations, useGameStatus } from './hooks/useGame';
 import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
@@ -68,6 +71,32 @@ const SanskritGrammarGame = () => {
   // Dynamic max hit points based on game step length
   const [maxHitPoints, setMaxHitPoints] = useState(MAXIMUM_HIT_POINTS);
 
+  // Effect states for visual and audio feedback
+  const [answerFeedback1, setAnswerFeedback1] = useState<{ isVisible: boolean; isCorrect: boolean }>({
+    isVisible: false,
+    isCorrect: false
+  });
+  const [answerFeedback2, setAnswerFeedback2] = useState<{ isVisible: boolean; isCorrect: boolean }>({
+    isVisible: false,
+    isCorrect: false
+  });
+  const [gameEndEffect1, setGameEndEffect1] = useState<{ isVisible: boolean; isVictory: boolean }>({
+    isVisible: false,
+    isVictory: false
+  });
+  const [gameEndEffect2, setGameEndEffect2] = useState<{ isVisible: boolean; isVictory: boolean }>({
+    isVisible: false,
+    isVictory: false
+  });
+  const [hpChangeEffect1, setHpChangeEffect1] = useState<{ isVisible: boolean; isDamage: boolean }>({
+    isVisible: false,
+    isDamage: false
+  });
+  const [hpChangeEffect2, setHpChangeEffect2] = useState<{ isVisible: boolean; isDamage: boolean }>({
+    isVisible: false,
+    isDamage: false
+  });
+
   /**
    * 関数定義
    */
@@ -109,16 +138,79 @@ const SanskritGrammarGame = () => {
     resetGame();
   };
 
+  // Helper functions for effects
+  const showAnswerFeedback1 = (isCorrect: boolean) => {
+    setAnswerFeedback1({ isVisible: true, isCorrect });
+  };
+
+  const hideAnswerFeedback1 = () => {
+    setAnswerFeedback1({ isVisible: false, isCorrect: false });
+  };
+
+  const showAnswerFeedback2 = (isCorrect: boolean) => {
+    setAnswerFeedback2({ isVisible: true, isCorrect });
+  };
+
+  const hideAnswerFeedback2 = () => {
+    setAnswerFeedback2({ isVisible: false, isCorrect: false });
+  };
+
+  const showGameEndEffect1 = (isVictory: boolean) => {
+    setGameEndEffect1({ isVisible: true, isVictory });
+  };
+
+  const hideGameEndEffect1 = () => {
+    setGameEndEffect1({ isVisible: false, isVictory: false });
+  };
+
+  const showGameEndEffect2 = (isVictory: boolean) => {
+    setGameEndEffect2({ isVisible: true, isVictory });
+  };
+
+  const hideGameEndEffect2 = () => {
+    setGameEndEffect2({ isVisible: false, isVictory: false });
+  };
+
+  const showHpChangeEffect1 = (isDamage: boolean) => {
+    // Reset first, then show after a small delay to ensure fresh state
+    setHpChangeEffect1({ isVisible: false, isDamage: false });
+    setTimeout(() => {
+      setHpChangeEffect1({ isVisible: true, isDamage });
+    }, 50);
+  };
+
+  const hideHpChangeEffect1 = () => {
+    setHpChangeEffect1({ isVisible: false, isDamage: false });
+  };
+
+  const showHpChangeEffect2 = (isDamage: boolean) => {
+    // Reset first, then show after a small delay to ensure fresh state
+    setHpChangeEffect2({ isVisible: false, isDamage: false });
+    setTimeout(() => {
+      setHpChangeEffect2({ isVisible: true, isDamage });
+    }, 50);
+  };
+
+  const hideHpChangeEffect2 = () => {
+    setHpChangeEffect2({ isVisible: false, isDamage: false });
+  };
+
   // ゲームクリア処理
   const handleGameWin = () => {
-    setGameState('stopped');
-    setCurrentScreen('gameClear');
+    showGameEndEffect1(true);
+    setTimeout(() => {
+      setGameState('stopped');
+      setCurrentScreen('gameClear');
+    }, 3000);
   };
 
     // ゲームクリア処理
   const handleGameWin2 = () => {
-    setGameState('stopped');
-    setCurrentScreen('gameClear2');
+    showGameEndEffect2(true);
+    setTimeout(() => {
+      setGameState('stopped');
+      setCurrentScreen('gameClear2');
+    }, 3000);
   };
 
   const handleGameFail = () => {
@@ -138,8 +230,9 @@ const SanskritGrammarGame = () => {
   const healHP = () => {
     if (hitPoints < maxHitPoints) {
       setHitPoints(prev => prev + 1);
+      showHpChangeEffect1(false); // Show heal effect
     } else {
-      alert('HPは最大値です！');
+      alert('HP is at maximum!');
     }
   };
 
@@ -147,9 +240,14 @@ const SanskritGrammarGame = () => {
   const damageHP = () => {
     if (hitPoints > 1) {
       setHitPoints(prev => prev - 1);
+      showHpChangeEffect1(true); // Show damage effect
     } else {
       setHitPoints(0);
-      handleGameWin2(); // HPがなくなるとゲーム失敗
+      showHpChangeEffect1(true); // Show damage effect
+      showGameEndEffect1(false); // Show defeat effect for Player 1
+      setTimeout(() => {
+        handleGameWin2(); // HPがなくなるとゲーム失敗
+      }, 3000);
     }
   };
 
@@ -157,10 +255,15 @@ const SanskritGrammarGame = () => {
   const damageHP2 = () => {
     if (hitPoints2 > 1) {
       setHitPoints2(prev => prev - 1);
+      showHpChangeEffect2(true); // Show damage effect
     } else {
       // プレイヤー2のゲーム失敗処理
       setHitPoints2(0);
-      handleGameWin(); // HPがなくなるとゲーム失敗
+      showHpChangeEffect2(true); // Show damage effect
+      showGameEndEffect2(false); // Show defeat effect for Player 2
+      setTimeout(() => {
+        handleGameWin(); // HPがなくなるとゲーム失敗
+      }, 3000);
     }
   };
 
@@ -191,15 +294,15 @@ const SanskritGrammarGame = () => {
     setCurrentQuestionDataIndex(0);
 
     // Calculate max hit points based on game step length
-    const gameStepLength = result.value1.length;
-    const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
-    setMaxHitPoints(calculatedMaxHitPoints);
+    // const gameStepLength = result.value1.length;
+    // const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
+    // setMaxHitPoints(calculatedMaxHitPoints);
 
     // プレイヤー1用のリセット
-    setHitPoints(calculatedMaxHitPoints);
+    setHitPoints(MAXIMUM_HIT_POINTS);
     setPlayerScore(INIT_POINT);
     // プレイヤー2用のリセット
-    setHitPoints2(calculatedMaxHitPoints);
+    setHitPoints2(MAXIMUM_HIT_POINTS);
     setPlayerScore2(INIT_POINT);
   };
 
@@ -213,7 +316,7 @@ const SanskritGrammarGame = () => {
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore(prev => prev + 10);
-    alert('プレイヤー1: 正解！');
+    alert('Player 1: Correct!');
 
     damageHP2();
 
@@ -235,7 +338,7 @@ const SanskritGrammarGame = () => {
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore2(prev => prev + 10);
-    alert('プレイヤー2: 正解！');
+    alert('Player 2: Correct!');
 
     damageHP();
 
@@ -249,6 +352,11 @@ const SanskritGrammarGame = () => {
 
   const selectRuleSubmit = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+
+    // Show answer feedback for Player 1
+    showAnswerFeedback1(result.correct);
+
+    // Continue immediately without waiting for feedback
     if (result.correct === true) {
       damageHP2();
       if (!result.next_step_id) {
@@ -262,6 +370,11 @@ const SanskritGrammarGame = () => {
 
   const selectRuleSubmit2 = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+
+    // Show answer feedback for Player 2
+    showAnswerFeedback2(result.correct);
+
+    // Continue immediately without waiting for feedback
     if (result.correct === true) {
       damageHP();
       if (!result.next_step_id) {
@@ -479,6 +592,49 @@ const SanskritGrammarGame = () => {
         {currentScreen === 'results' && (
           <div>Results not implemented!</div>
         )}
+
+        {/* Effect Components */}
+        <AnswerFeedback
+          isVisible={answerFeedback1.isVisible}
+          isCorrect={answerFeedback1.isCorrect}
+          onComplete={hideAnswerFeedback1}
+          playerId={1}
+        />
+        
+        <AnswerFeedback
+          isVisible={answerFeedback2.isVisible}
+          isCorrect={answerFeedback2.isCorrect}
+          onComplete={hideAnswerFeedback2}
+          playerId={2}
+        />
+
+        <GameEndEffects
+          isVisible={gameEndEffect1.isVisible}
+          isVictory={gameEndEffect1.isVictory}
+          onComplete={hideGameEndEffect1}
+          playerId={1}
+        />
+        
+        <GameEndEffects
+          isVisible={gameEndEffect2.isVisible}
+          isVictory={gameEndEffect2.isVictory}
+          onComplete={hideGameEndEffect2}
+          playerId={2}
+        />
+
+        <HPChangeEffect
+          isVisible={hpChangeEffect1.isVisible}
+          isDamage={hpChangeEffect1.isDamage}
+          onComplete={hideHpChangeEffect1}
+          playerId={1}
+        />
+        
+        <HPChangeEffect
+          isVisible={hpChangeEffect2.isVisible}
+          isDamage={hpChangeEffect2.isDamage}
+          onComplete={hideHpChangeEffect2}
+          playerId={2}
+        />
     </GameInputProvider>
   );
 };
