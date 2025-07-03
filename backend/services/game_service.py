@@ -37,8 +37,8 @@ class GameService(IGameService):
         """Start a new game session"""
         # Generate unique game ID
         game_id = str(uuid.uuid4())
-        dhatu = self._word_service.get_random_dhatu()
-        prakriya = self._word_service.get_random_prakriya(dhatu)
+        dhatu = self._word_service.get_random_dhatu(level=request.level)
+        prakriya = self._word_service.get_random_prakriya(dhatu, level=request.level)
 
         steps = []
         from_word = dhatu.aupadeshika
@@ -204,7 +204,7 @@ class GameService(IGameService):
         for sutra in all_choices:
             # Simple description (you can enhance this with actual rule descriptions)
             print(sutra)
-            choices.append(SutraChoice(sutra=sutra.code, description=self._to_devanagari(sutra.text)))
+            choices.append(SutraChoice(sutra=sutra.code, description=self._convert(sutra.text, level='beginner')))
         
         return GetChoicesResponse(choices=choices)
 
@@ -253,6 +253,6 @@ class GameService(IGameService):
         if level == 'expert':
             to_scheme = Scheme.Devanagari
         else:
-            to_scheme = Scheme.Slp1
+            to_scheme = Scheme.HarvardKyoto
             
         return transliterate(txt, Scheme.Slp1, to_scheme)
