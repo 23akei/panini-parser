@@ -1,4 +1,5 @@
 import React from "react";
+import { GiMagicLamp } from "react-icons/gi";
 
 interface HPDisplayProps {
   hitPoints: number;
@@ -6,11 +7,14 @@ interface HPDisplayProps {
 
 const HPDisplay: React.FC<HPDisplayProps> = ({ hitPoints }) => {
   return (
-    <div className="bg-red-100 border-2 border-red-500 rounded-lg px-4 py-2 flex items-center space-x-2">
-      <span className="text-red-700">❤️</span>
-      <span className="text-red-700 font-semibold">HP</span>
-      <div className="text-xl font-bold text-red-800">
-        {Array(hitPoints).fill('💚')}
+    <div className="rounded-lg px-4 py-2 flex items-center space-x-2">
+      <div className="flex space-x-2">
+        <GiMagicLamp className="text-yellow-500 text-7xl" />
+        <GiMagicLamp className="text-yellow-500 text-7xl" />
+        <GiMagicLamp className="text-yellow-500 text-7xl" />
+        <GiMagicLamp className="text-yellow-500 text-7xl" />
+        <GiMagicLamp className="text-gray-500 text-7xl" />
+        <GiMagicLamp className="text-gray-500 text-7xl" />
         {/* {hitPoints} / 5 */}
       </div>
     </div>
