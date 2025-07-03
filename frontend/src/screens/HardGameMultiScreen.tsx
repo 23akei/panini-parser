@@ -170,6 +170,7 @@ const PlayerSection = ({
           <SutraChoicesComponent
             choices={choiceList}
             onSelect={selectRuleSubmit}
+            onHover={(idx: number) => setSelectedIndex(idx)}
             disabled={gameState !== 'playing'}
             selectedIndex={selectedIndex}
           />
