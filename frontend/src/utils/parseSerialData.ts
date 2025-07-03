@@ -49,6 +49,10 @@ export const parseSerialData = (text: string, devicePlayerId: 1 | 2): SerialData
             data.button = buttonMap[buttonPin];
           }
         }
+        else if (pressed === 0) {
+          // Button release, we don't need to return this
+          return null;
+        }
       }
     }
 

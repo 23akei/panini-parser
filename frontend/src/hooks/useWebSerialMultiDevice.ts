@@ -4,8 +4,8 @@ import { parseSerialData } from '../utils/parseSerialData';
 
 export const useWebSerialMultiDevice = () => {
   const [devices, setDevices] = useState<Devices>({
-    player1: { port: null, reader: null, isConnected: false, lastInput: null },
-    player2: { port: null, reader: null, isConnected: false, lastInput: null }
+    player1: { port: null, reader: null, isConnected: false, lastInput: null, inputProcessed: false, isToggled: false },
+    player2: { port: null, reader: null, isConnected: false, lastInput: null, inputProcessed: false, isToggled: false }
   });
 
   const readLoop = async (reader: ReadableStreamDefaultReader, playerId: 1 | 2) => {
@@ -24,13 +24,28 @@ export const useWebSerialMultiDevice = () => {
         for (const line of lines) {
           const parsedData = parseSerialData(line, playerId);
           if (parsedData) {
-            setDevices(prev => ({
-              ...prev,
-              [`player${playerId}`]: {
-                ...prev[`player${playerId}`],
-                lastInput: parsedData
+            setDevices(prev => {
+              const playerStr = `player${playerId}` as const;
+              const prevDevice = prev[playerStr];
+              let newToggled = prevDevice.isToggled;
+              let newInputProcessed = false;
+
+              // If the button is 'k', flip the toggle
+              if (parsedData.button === 'k') {
+                newToggled = !prevDevice.isToggled;
+                newInputProcessed = true;
               }
-            }));
+
+              return {
+                ...prev,
+                [playerStr]: {
+                  ...prevDevice,
+                  lastInput: parsedData,
+                  inputProcessed: newInputProcessed,
+                  isToggled: newToggled
+                }
+              };
+            });
           }
         }
       }
@@ -38,6 +53,17 @@ export const useWebSerialMultiDevice = () => {
       console.error(`Player ${playerId} read error:`, error);
     }
   };
+
+  // 🔧 追加：処理済みにマークする関数
+  const markInputProcessed = useCallback((playerId: 1 | 2) => {
+    setDevices(prev => ({
+      ...prev,
+      [`player${playerId}`]: {
+        ...prev[`player${playerId}`],
+        inputProcessed: true
+      }
+    }));
+  }, []);
 
   const connect = useCallback(async (playerId: 1 | 2) => {
     try {
@@ -53,7 +79,9 @@ export const useWebSerialMultiDevice = () => {
           port,
           reader,
           isConnected: true,
-          lastInput: null
+          lastInput: null,
+          inputProcessed: true,
+          isToggled: false
         }
       }));
 
@@ -84,7 +112,9 @@ export const useWebSerialMultiDevice = () => {
           port: null,
           reader: null,
           isConnected: false,
-          lastInput: null
+          lastInput: null,
+          inputProcessed: true,
+          isToggled: false
         }
       }));
     } catch (error) {

@@ -16,6 +16,7 @@ import { ApiClient } from '../api/client';
 interface SutraChoice {
   sutra: string;
   desc: string;
+  answer: boolean;
 }
 
 export type { SutraChoice };
@@ -96,6 +97,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
     return result.map(choice => ({
       sutra: choice.sutra,
       desc: choice.description,
+      answer: choice.answer || false, // answerが存在しない場合はfalseとする
     }));
   };
 

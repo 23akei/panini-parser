@@ -22,6 +22,7 @@ import { useGameOperations, useGameStatus } from './hooks/useGame';
 import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
 import type { SutraChoice } from './screens/HardGameMultiScreen';
+import { GameInputProvider } from './contexts/GameInputContext';
 
 const SanskritGrammarGame = () => {
   /**
@@ -33,11 +34,11 @@ const SanskritGrammarGame = () => {
 
   // API hooks
   const { startGame: startGameMutation, submitAnswer, finishGame, isLoading, error } = useGameOperations();
-  
+
   // API state
   const [currentGameData, setCurrentGameData] = useState<StartGameResponse | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  
+
   const {
     data: gameStatus
   } = useGameStatus(
@@ -50,7 +51,7 @@ const SanskritGrammarGame = () => {
   const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'connectController' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
   const [timer, setTimer] = useState(INIT_TIMER);
-  
+
   // 問題データのステート
   const [questions, setQuestions] = useState<Question[]>();
   const [gameId, setGameId] = useState<string>('');
@@ -98,7 +99,7 @@ const SanskritGrammarGame = () => {
     const startGameResult = await ApiClient.startGame(apiLevel, gameLength)
     return {
       value1: mapStepsToQuestions(startGameResult),
-      value2: startGameResult.game_id // APIから取得したゲームIDを使用  
+      value2: startGameResult.game_id // APIから取得したゲームIDを使用
     }
   };
 
@@ -156,7 +157,7 @@ const SanskritGrammarGame = () => {
       setHitPoints2(0);
       handleGameWin(); // HPがなくなるとゲーム失敗
     }
-    
+
   };
 
   const resetHP = () => {
@@ -175,12 +176,12 @@ const SanskritGrammarGame = () => {
     setQuestions(result.value1);
     setGameId(result.value2);
     setCurrentQuestionDataIndex(0);
-    
+
     // Calculate max hit points based on game step length
     const gameStepLength = result.value1.length;
     const calculatedMaxHitPoints = calculateMaxHitPoints(gameStepLength);
     setMaxHitPoints(calculatedMaxHitPoints);
-    
+
     // プレイヤー1用のリセット
     setHitPoints(calculatedMaxHitPoints);
     setPlayerScore(INIT_POINT);
@@ -193,9 +194,9 @@ const SanskritGrammarGame = () => {
   const handleRuleSubmit = (_questionsParam: Question[]) => {
     // 常にstateのquestionsを使用する
     if (!questions || questions.length === 0) return;
-    
+
     const currentQ = questions[currentQuestionDataIndex];
-    
+
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore(prev => prev + 10);
@@ -215,9 +216,9 @@ const SanskritGrammarGame = () => {
   const handleRuleSubmit2 = (_questionsParam: Question[]) => {
     // 常にstateのquestionsを使用する
     if (!questions || questions.length === 0) return;
-    
+
     const currentQ = questions[currentQuestionDataIndex];
-    
+
     // ルールが正解かどうかをチェック
     // 現在は正解のみ返す
     setPlayerScore2(prev => prev + 10);
@@ -278,27 +279,27 @@ const SanskritGrammarGame = () => {
   };
 
   return (
-    <>
-      {currentScreen === 'home' && (
-        <HomeScreen onSelectMode={handleModeSelect} />
-      )}
+    <GameInputProvider>
+        {currentScreen === 'home' && (
+          <HomeScreen onSelectMode={handleModeSelect} />
+        )}
 
-      {currentScreen === 'modeSelect' && (
-        <ModeSelectScreen
-          gameMode={gameMode}
-          onSelectDifficulty={handleDifficultySelect}
-        />
-      )}
+        {currentScreen === 'modeSelect' && (
+          <ModeSelectScreen
+            gameMode={gameMode}
+            onSelectDifficulty={handleDifficultySelect}
+          />
+        )}
 
-      {currentScreen === 'connectController' && (
-        <ConnectControllerScreen
-          onConnectComplete={handleConnectComplete}
-        />
-      )}
+        {currentScreen === 'connectController' && (
+          <ConnectControllerScreen
+            onConnectComplete={handleConnectComplete}
+          />
+        )}
 
       {currentScreen === 'game' && gameMode === 'single' && (
         difficulty === 'HARD' ? (
-          <HardGameScreen 
+          <HardGameScreen
             gameId={gameId}
             gameState={gameState}
             timer={timer}
@@ -323,7 +324,7 @@ const SanskritGrammarGame = () => {
             }}
           />
         ) : (
-          <EasyGameScreen 
+          <EasyGameScreen
             gameId={gameId}
             gameState={gameState}
             timer={timer}
@@ -352,7 +353,7 @@ const SanskritGrammarGame = () => {
 
       {currentScreen === 'game' && gameMode === 'multi' && (
         difficulty === 'HARD' ? (
-          <HardGameMultiScreen 
+          <HardGameMultiScreen
             gameId={gameId}
             gameState={gameState}
             timer={timer}
@@ -390,7 +391,7 @@ const SanskritGrammarGame = () => {
             }}
           />
         ) : (
-          <EasyGameMultiScreen 
+          <EasyGameMultiScreen
             gameId={gameId}
             gameState={gameState}
             timer={timer}
@@ -430,32 +431,32 @@ const SanskritGrammarGame = () => {
         )
       )}
 
-      {currentScreen === 'gameClear' && (
-        <GameClearScreen
-          playerName="Player 1"
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'gameClear' && (
+          <GameClearScreen
+            playerName="Player 1"
+            onReturnHome={returnToHome}
+          />
+        )}
 
-      {currentScreen === 'gameClear2' && (
-        <GameClearScreen
-          playerName="Player 2"
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'gameClear2' && (
+          <GameClearScreen
+            playerName="Player 2"
+            onReturnHome={returnToHome}
+          />
+        )}
 
 
-      {currentScreen === 'gameFailed' && (
-        <GameFailedScreen
-          playerScore={playerScore}
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'gameFailed' && (
+          <GameFailedScreen
+            playerScore={playerScore}
+            onReturnHome={returnToHome}
+          />
+        )}
 
-      {currentScreen === 'results' && (
-        <div>Results not implemented!</div>
-      )}
-    </>
+        {currentScreen === 'results' && (
+          <div>Results not implemented!</div>
+        )}
+    </GameInputProvider>
   );
 };
 
