@@ -11,6 +11,7 @@ import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import HintsPanel from '../components/HintsPanel';
 import { ApiClient } from '../api/client';
+import { useGameInput } from '../contexts/GameInputContext';
 
 // Sutra選択肢の型定義
 interface SutraChoice {
@@ -22,45 +23,44 @@ interface SutraChoice {
 export type { SutraChoice };
 
 // Sutra選択肢を表示するコンポーネント
-const SutraChoicesComponent: React.FC<{
-  choices: Promise<SutraChoice[]>;
+interface SutraChoicesComponentProps {
+  choices: SutraChoice[];
   onSelect: (choice: SutraChoice) => void;
   disabled: boolean;
-  
-}> = ({ choices, onSelect, disabled }) => {
-  const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
+  onHover?: (index: number) => void;
+  selectedIndex: number;
+}
 
-  useEffect(() => {
-    const fetchChoices = async () => {
-      try {
-        const result = await choices;
-        setChoiceList(result);
-      } catch (err) {
-        console.error('Failed to fetch sutra choices:', err);
-      }
-  };
-  fetchChoices();
-}, [choices]);
-
+const SutraChoicesComponent = ({
+  choices,
+  onSelect,
+  disabled,
+  onHover,
+  selectedIndex
+}: SutraChoicesComponentProps) => {
   return (
     <div className="mt-4">
       <div className="grid grid-cols-2 gap-4 w-max mx-auto">
-        {choiceList.map(choice => (
+        {choices.map((choice: SutraChoice, idx: number) => (
           <button
             key={choice.sutra}
             onClick={() => onSelect(choice)}
+            onMouseOver={() => onHover && onHover(idx)}
             disabled={disabled}
-            className={`text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
-              bg-transparent text-white border-white
+            className={`
+              text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
+              ${selectedIndex === idx
+                ? 'bg-[#00D1A8] text-pink-500 border-pink-500'
+                : 'bg-transparent text-white border-white'}
               hover:bg-[#00D1A8] hover:text-pink-500 hover:border-pink-500
-              disabled:opacity-50 disabled:cursor-not-allowed`}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
           >
             {choice.sutra}
           </button>
         ))}
       </div>
     </div>
-
   );
 };
 
@@ -78,7 +78,12 @@ interface HardGameMultiScreenProps {
   player2: PlayerProps;
 }
 
-const PlayerSection: React.FC<PlayerProps> = ({
+interface PlayerSectionProps extends PlayerProps {
+  gameId: string;
+  maxHitPoints: number;
+}
+
+const PlayerSection = ({
   gameState,
   hitPoints,
   playerScore,
@@ -90,19 +95,58 @@ const PlayerSection: React.FC<PlayerProps> = ({
   playerName,
   gameId,
   maxHitPoints
-}) => {
-  // Sutraの選択肢を取得する関数
-  const choices = useMemo(() => {
-    const getChoices = async (): Promise<SutraChoice[]> => {
-      const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
-      return result.map(choice => ({
-        sutra: choice.sutra,
-        desc: choice.description,
-        answer: choice.answer || false,
-      }));
+}: PlayerSectionProps) => {
+
+  // Sutraの選択肢を取得・管理
+  const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchChoices = async () => {
+      try {
+        const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex + 1)).choices;
+        const mapped = result.map(choice => ({
+          sutra: choice.sutra,
+          desc: choice.description,
+          answer: choice.answer || false,
+        }));
+        if (isMounted) setChoiceList(mapped);
+      } catch (err) {
+        if (isMounted) setChoiceList([]);
+        console.error('Failed to fetch sutra choices:', err);
+      }
     };
-    return getChoices();
+    fetchChoices();
+    return () => { isMounted = false; };
   }, [gameId, currentQuestionDataIndex]);
+
+  // --- コントローラー入力対応 ---
+  const { devices, markInputProcessed } = useGameInput();
+  const isPlayer1 = playerName === 'Player 1';
+  const device = isPlayer1 ? devices.player1 : devices.player2;
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  // コントローラー入力監視
+  useEffect(() => {
+    if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
+    if (choiceList.length === 0) return;
+    // 方向入力で選択肢移動
+    if (device.lastInput.direction === 'right') {
+      setSelectedIndex(selectedIndex => (selectedIndex + 1) % choiceList.length);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    } else if (device.lastInput.direction === 'left') {
+      setSelectedIndex(selectedIndex => (selectedIndex - 1 + choiceList.length) % choiceList.length);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    } else if (device.lastInput.button === 'a') {
+      // 'a'ボタンでsubmit
+      selectRuleSubmit(choiceList[selectedIndex]);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    }
+  }, [device.lastInput, device.inputProcessed, gameState, choiceList, selectRuleSubmit, markInputProcessed, isPlayer1, selectedIndex]);
+
+  // 問題が変わったら選択肢リセット
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [currentQuestionDataIndex, gameId]);
 
   return (
     <div className="h-screen rounded-lg p-4 border-[12px] border-pink-400 bg-[#001f3f]">
@@ -124,9 +168,10 @@ const PlayerSection: React.FC<PlayerProps> = ({
       <div className="flex justify-center w-full">
         <div className="grid grid-cols-1 gap-4 w-max">
           <SutraChoicesComponent
-            choices={choices}
+            choices={choiceList}
             onSelect={selectRuleSubmit}
             disabled={gameState !== 'playing'}
+            selectedIndex={selectedIndex}
           />
         </div>
       </div>
