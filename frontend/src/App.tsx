@@ -84,7 +84,9 @@ const SanskritGrammarGame = () => {
   // 問題データを取得する関数
   const getQuestions = async (): Promise<{ value1: Question[]; value2: string }> => {
     const apiLevel = mapDifficultyToApiLevel(difficulty);
-    const startGameResult = await ApiClient.startGame(apiLevel)
+    // Set game length to balance with hit points (2 lives = 3 questions for fair gameplay)
+    const gameLength = MAXIMUM_HIT_POINTS + 1;
+    const startGameResult = await ApiClient.startGame(apiLevel, gameLength)
     return {
       value1: mapStepsToQuestions(startGameResult),
       value2: startGameResult.game_id // APIから取得したゲームIDを使用  

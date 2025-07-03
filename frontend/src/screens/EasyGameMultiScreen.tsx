@@ -5,6 +5,7 @@ import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import { ApiClient } from '../api/client';
+import { MAXIMUM_HIT_POINTS } from '../constants/appConstants';
 
 // Sutra選択肢の型定義
 interface SutraChoice {
@@ -101,7 +102,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       </h2>
 
       <div className="flex items-center justify-center space-x-4 w-full">
-        <HPDisplay hitPoints={hitPoints} />
+        <HPDisplay hitPoints={hitPoints} maxHitPoints={MAXIMUM_HIT_POINTS} />
       </div>
 
       <div className="flex items-center justify-center space-x-4 w-full">
