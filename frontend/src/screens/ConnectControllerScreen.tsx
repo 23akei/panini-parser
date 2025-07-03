@@ -11,7 +11,8 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
   const { connect } = useGameInput();
 
   const { devices } = useGameInput(); // devicesは現在の接続状態を取得
-  console.log(devices.player1.lastInput);
+  console.log(devices.player1.lastInput, " ", devices.player1.isToggled, " ", devices.player1.inputProcessed);
+  console.log(devices.player2.lastInput, " ", devices.player2.isToggled, " ", devices.player2.inputProcessed);
 
   const handlePlayer1Connect = () => {
     connect(1);

@@ -9,6 +9,8 @@ export interface DeviceConnection {
   reader: ReadableStreamDefaultReader | null;
   isConnected: boolean;
   lastInput: SerialData | null;
+  inputProcessed?: boolean;
+  isToggled?: boolean;
 }
 
 export type Devices = {
