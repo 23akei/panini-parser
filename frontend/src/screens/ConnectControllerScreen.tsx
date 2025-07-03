@@ -6,8 +6,8 @@ interface ConnectControllerScreenProps {
 }
 
 const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onConnectComplete }) => {
-  const [player1Connected, setPlayer1Connected] = useState(false);
-  const [player2Connected, setPlayer2Connected] = useState(false);
+  // const [player1Connected, setPlayer1Connected] = useState(false);
+  // const [player2Connected, setPlayer2Connected] = useState(false);
   const { connect } = useGameInput();
 
   const { devices } = useGameInput(); // devicesは現在の接続状態を取得
@@ -16,26 +16,37 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
 
   const handlePlayer1Connect = () => {
     connect(1);
-    setPlayer1Connected(true);
+    setdevices.player1.isConnected(true);
   };
 
   const handlePlayer2Connect = () => {
     connect(2);
-    setPlayer2Connected(true);
+    setdevices.player2.isConnected(true);
   };
 
-  const canStartGame = player1Connected && player2Connected;
+  const canStartGame = devices.player1.isConnected && devices.player2.isConnected;
 
   // 両方のプレイヤーが接続されたら自動でページ遷移
   useEffect(() => {
-    if (canStartGame) {
-      const timer = setTimeout(() => {
-        onConnectComplete();
-      }, 1500); // 1.5秒後に自動遷移
+    let timer: ReturnType<typeof setTimeout>;
 
-      return () => clearTimeout(timer);
-    }
-  }, [canStartGame, onConnectComplete]);
+    if (devices.player1.isConnected && devices.player2.isConnected) {
+      // 両方が接続されたら1.5秒後に遷移
+      timer = setTimeout(() => {
+        onConnectComplete();
+      }, 1500);
+    } else {
+      // どちらかが接続されていなければ10秒後に遷移
+      timer = setTimeout(() => {
+        onConnectComplete();
+      }, 10000);
+    } 
+    return () => clearTimeout(timer); // クリーンアップ必須 :contentReference[oaicite:1]{index=1}
+  }, [
+    devices.player1.isConnected,
+    devices.player2.isConnected
+  ]);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
       <div className="max-w-2xl w-full mx-4">
@@ -54,7 +65,7 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
               {/* Player 1 */}
               <div className="text-center flex flex-col">
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Player 1</h3>
-                {player1Connected ? (
+                {devices.player1.isConnected ? (
                   <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-green-700 font-semibold">
                       ✓ 接続済み
@@ -69,21 +80,21 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
                 )}
                 <button
                   onClick={handlePlayer1Connect}
-                  disabled={player1Connected}
+                  disabled={devices.player1.isConnected}
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 ${
-                    player1Connected
+                    devices.player1.isConnected
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
                   }`}
                 >
-                  {player1Connected ? 'Connected' : 'Connect'}
+                  {devices.player1.isConnected ? 'Connected' : 'Connect'}
                 </button>
               </div>
 
               {/* Player 2 */}
               <div className="text-center flex flex-col">
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Player 2</h3>
-                {player2Connected ? (
+                {devices.player2.isConnected ? (
                   <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mb-4 flex-grow flex items-center justify-center">
                     <div className="text-green-700 font-semibold">
                       ✓ 接続済み
@@ -98,14 +109,14 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
                 )}
                 <button
                   onClick={handlePlayer2Connect}
-                  disabled={player2Connected}
+                  disabled={devices.player2.isConnected}
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 ${
-                    player2Connected
+                    devices.player2.isConnected
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-red-600 hover:bg-red-700 text-white'
                   }`}
                 >
-                  {player2Connected ? 'Connected' : 'Connect'}
+                  {devices.player2.isConnected ? 'Connected' : 'Connect'}
                 </button>
               </div>
             </div>
