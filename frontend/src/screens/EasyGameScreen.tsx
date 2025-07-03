@@ -199,6 +199,7 @@ const EasyGameScreen: React.FC<EasyGameScreenProps> = ({
 }) => {
   return (
     <div className="h-screen flex bg-[#001f3f] p-4 gap-6 overflow-hidden justify-center">
+      <audio src="main.m4a" autoPlay loop id="myAudio"></audio>
       <div className="flex-1 h-full max-w-[50%]">
         <PlayerSection 
           {...player}
