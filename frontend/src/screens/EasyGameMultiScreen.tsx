@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import QuestionDisplay from '../components/QuestionDisplay';
 import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
@@ -10,6 +10,7 @@ import { ApiClient } from '../api/client';
 interface SutraChoice {
   sutra: string;
   desc: string;
+  answer: boolean;
 }
 
 export type { SutraChoice };
@@ -82,14 +83,17 @@ const PlayerSection: React.FC<PlayerProps> = ({
   gameId,
   maxHitPoints
 }) => {
-  // Sutraの選択肢を取得する関数
-  const getChoices = async (): Promise<SutraChoice[]> => {
-    const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
-    return result.map(choice => ({
-      sutra: choice.sutra,
-      desc: choice.description,
-    }));
-  };
+  const choices = useMemo(() => {
+    const getChoices = async (): Promise<SutraChoice[]> => {
+      const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
+      return result.map(choice => ({
+        sutra: choice.sutra,
+        desc: choice.description,
+        answer: choice.answer || false,
+      }));
+    };
+    return getChoices();
+  }, [gameId, currentQuestionDataIndex]);
 
   return (
     <div className="h-screen rounded-lg p-4 border-[12px] border-pink-400 bg-[#001f3f]">
@@ -111,7 +115,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       <div className="flex justify-center w-full">
         <div className="grid grid-cols-1 gap-4 w-max">
           <SutraChoicesComponent
-            choices={getChoices()}
+            choices={choices}
             onSelect={selectRuleSubmit}
             disabled={gameState !== 'playing'}
           />

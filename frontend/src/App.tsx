@@ -238,12 +238,11 @@ const SanskritGrammarGame = () => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP2();
+      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
     } else {
       damageHP();
     }
-    if (result.next_step_id) {
-      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
-    } else {
+    if (!result.next_step_id) {
       handleGameWin();
     }
   }
@@ -252,12 +251,11 @@ const SanskritGrammarGame = () => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP();
+      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
     } else {
       damageHP2();
     }
-    if (result.next_step_id) {
-      setCurrentQuestionDataIndex(prev => prev + 1); // 次のステップに進む
-    } else {
+    if (!result.next_step_id) {
       handleGameWin2();
     }
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Timer from '../components/Timer';
 import GameControls from '../components/GameControls';
 import QuestionDisplay from '../components/QuestionDisplay';
@@ -92,14 +92,17 @@ const PlayerSection: React.FC<PlayerProps> = ({
   maxHitPoints
 }) => {
   // Sutraの選択肢を取得する関数
-  const getChoices = async (): Promise<SutraChoice[]> => {
-    const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
-    return result.map(choice => ({
-      sutra: choice.sutra,
-      desc: choice.description,
-      answer: choice.answer || false, // answerが存在しない場合はfalseとする
-    }));
-  };
+  const choices = useMemo(() => {
+    const getChoices = async (): Promise<SutraChoice[]> => {
+      const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
+      return result.map(choice => ({
+        sutra: choice.sutra,
+        desc: choice.description,
+        answer: choice.answer || false,
+      }));
+    };
+    return getChoices();
+  }, [gameId, currentQuestionDataIndex]);
 
   return (
     <div className="h-screen rounded-lg p-4 border-[12px] border-pink-400 bg-[#001f3f]">
@@ -121,7 +124,7 @@ const PlayerSection: React.FC<PlayerProps> = ({
       <div className="flex justify-center w-full">
         <div className="grid grid-cols-1 gap-4 w-max">
           <SutraChoicesComponent
-            choices={getChoices()}
+            choices={choices}
             onSelect={selectRuleSubmit}
             disabled={gameState !== 'playing'}
           />
