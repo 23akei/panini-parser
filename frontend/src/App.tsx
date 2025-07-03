@@ -22,6 +22,7 @@ import { useGameOperations, useGameStatus } from './hooks/useGame';
 import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
 import type { SutraChoice } from './screens/HardGameMultiScreen';
+import { GameInputProvider } from './contexts/GameInputContext';
 
 const SanskritGrammarGame = () => {
   /**
@@ -262,100 +263,100 @@ const SanskritGrammarGame = () => {
   };
 
   return (
-    <>
-      {currentScreen === 'home' && (
-        <HomeScreen onSelectMode={handleModeSelect} />
-      )}
+    <GameInputProvider>
+        {currentScreen === 'home' && (
+          <HomeScreen onSelectMode={handleModeSelect} />
+        )}
 
-      {currentScreen === 'modeSelect' && (
-        <ModeSelectScreen
-          gameMode={gameMode}
-          onSelectDifficulty={handleDifficultySelect}
-        />
-      )}
-
-      {currentScreen === 'connectController' && (
-        <ConnectControllerScreen
-          onConnectComplete={handleConnectComplete}
-        />
-      )}
-
-      {currentScreen === 'game' && gameMode === 'single' && (
-        difficulty === 'HARD' ? (
-          <p>Not implemented!!!</p>
-        ) : (
-          <p>Not implemented!!!</p>
-        )
-      )}
-
-      {currentScreen === 'game' && gameMode === 'multi' && (
-        difficulty === 'HARD' ? (
-          <HardGameMultiScreen 
-            gameId={gameId}
-            gameState={gameState}
-            timer={timer}
-            questions={questions || []} /* nullチェック追加 */
-            currentQuestionDataIndex={currentQuestionDataIndex}
-            difficulty={difficulty}
-            startGame={startGame}
-            pauseGame={pauseGame}
-            resetGame={resetGame}
-            player1={{
-              gameState: gameState,
-              hitPoints: hitPoints,
-              playerScore: playerScore,
-              questions: questions || [], /* questions情報を追加 */
-              currentQuestionDataIndex: currentQuestionDataIndex,
-              setUserInput: setUserInput,
-              handleRuleSubmit: handleRuleSubmit,
-              playerName: "Player 1",
-              selectRuleSubmit: selectRuleSubmit,
-              gameId: gameId /* gameIdを追加 */
-            }}
-            player2={{
-              gameState: gameState,
-              hitPoints: hitPoints2,
-              playerScore: playerScore2,
-              questions: questions || [], /* questions情報を追加 */
-              currentQuestionDataIndex: currentQuestionDataIndex,
-              setUserInput: setUserInput2,
-              handleRuleSubmit: handleRuleSubmit2,
-              playerName: "Player 2",
-              selectRuleSubmit: selectRuleSubmit2,
-              gameId: gameId /* gameIdを追加 */
-            }}
+        {currentScreen === 'modeSelect' && (
+          <ModeSelectScreen
+            gameMode={gameMode}
+            onSelectDifficulty={handleDifficultySelect}
           />
-        ) : (
-           <p>Not implemented!!!</p>
-        )
-      )}
+        )}
 
-      {currentScreen === 'gameClear' && (
-        <GameClearScreen
-          playerName="Player 1"
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'connectController' && (
+          <ConnectControllerScreen
+            onConnectComplete={handleConnectComplete}
+          />
+        )}
 
-      {currentScreen === 'gameClear2' && (
-        <GameClearScreen
-          playerName="Player 2"
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'game' && gameMode === 'single' && (
+          difficulty === 'HARD' ? (
+            <p>Not implemented!!!</p>
+          ) : (
+            <p>Not implemented!!!</p>
+          )
+        )}
+
+        {currentScreen === 'game' && gameMode === 'multi' && (
+          difficulty === 'HARD' ? (
+            <HardGameMultiScreen 
+              gameId={gameId}
+              gameState={gameState}
+              timer={timer}
+              questions={questions || []} /* nullチェック追加 */
+              currentQuestionDataIndex={currentQuestionDataIndex}
+              difficulty={difficulty}
+              startGame={startGame}
+              pauseGame={pauseGame}
+              resetGame={resetGame}
+              player1={{
+                gameState: gameState,
+                hitPoints: hitPoints,
+                playerScore: playerScore,
+                questions: questions || [], /* questions情報を追加 */
+                currentQuestionDataIndex: currentQuestionDataIndex,
+                setUserInput: setUserInput,
+                handleRuleSubmit: handleRuleSubmit,
+                playerName: "Player 1",
+                selectRuleSubmit: selectRuleSubmit,
+                gameId: gameId /* gameIdを追加 */
+              }}
+              player2={{
+                gameState: gameState,
+                hitPoints: hitPoints2,
+                playerScore: playerScore2,
+                questions: questions || [], /* questions情報を追加 */
+                currentQuestionDataIndex: currentQuestionDataIndex,
+                setUserInput: setUserInput2,
+                handleRuleSubmit: handleRuleSubmit2,
+                playerName: "Player 2",
+                selectRuleSubmit: selectRuleSubmit2,
+                gameId: gameId /* gameIdを追加 */
+              }}
+            />
+          ) : (
+            <p>Not implemented!!!</p>
+          )
+        )}
+
+        {currentScreen === 'gameClear' && (
+          <GameClearScreen
+            playerName="Player 1"
+            onReturnHome={returnToHome}
+          />
+        )}
+
+        {currentScreen === 'gameClear2' && (
+          <GameClearScreen
+            playerName="Player 2"
+            onReturnHome={returnToHome}
+          />
+        )}
 
 
-      {currentScreen === 'gameFailed' && (
-        <GameFailedScreen
-          playerScore={playerScore}
-          onReturnHome={returnToHome}
-        />
-      )}
+        {currentScreen === 'gameFailed' && (
+          <GameFailedScreen
+            playerScore={playerScore}
+            onReturnHome={returnToHome}
+          />
+        )}
 
-      {currentScreen === 'results' && (
-        <div>Results not implemented!</div>
-      )}
-    </>
+        {currentScreen === 'results' && (
+          <div>Results not implemented!</div>
+        )}
+    </GameInputProvider>
   );
 };
 
