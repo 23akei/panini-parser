@@ -8,6 +8,7 @@ import HardGameMultiScreen from './screens/HardGameMultiScreen';
 import EasyGameMultiScreen from './screens/EasyGameMultiScreen';
 import HomeScreen from './screens/HomeScreen';
 import ModeSelectScreen from './screens/ModeSelectScreen';
+import ConnectControllerScreen from './screens/ConnectControllerScreen';
 import GameClearScreen from './screens/GameClearScreen';
 import GameFailedScreen from './screens/GameFailedScreen';
 import type { Question } from './types/interfaces';
@@ -46,7 +47,7 @@ const SanskritGrammarGame = () => {
 
   // Timer effect
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'connectController' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
   const [timer, setTimer] = useState(INIT_TIMER);
   
@@ -251,8 +252,12 @@ const SanskritGrammarGame = () => {
 
   const handleDifficultySelect = (selectedDifficulty: 'EASY' | 'HARD') => {
     setDifficulty(selectedDifficulty);
+    setCurrentScreen('connectController'); // ConnectController画面に遷移
+  };
+
+  const handleConnectComplete = async () => {
     setCurrentScreen('game');
-    resetGame();
+    await resetGame();
     startGame();
   };
 
@@ -266,6 +271,12 @@ const SanskritGrammarGame = () => {
         <ModeSelectScreen
           gameMode={gameMode}
           onSelectDifficulty={handleDifficultySelect}
+        />
+      )}
+
+      {currentScreen === 'connectController' && (
+        <ConnectControllerScreen
+          onConnectComplete={handleConnectComplete}
         />
       )}
 
@@ -298,7 +309,8 @@ const SanskritGrammarGame = () => {
               setUserInput: setUserInput,
               handleRuleSubmit: handleRuleSubmit,
               playerName: "Player 1",
-              selectRuleSubmit: selectRuleSubmit
+              selectRuleSubmit: selectRuleSubmit,
+              gameId: gameId /* gameIdを追加 */
             }}
             player2={{
               gameState: gameState,
@@ -309,7 +321,8 @@ const SanskritGrammarGame = () => {
               setUserInput: setUserInput2,
               handleRuleSubmit: handleRuleSubmit2,
               playerName: "Player 2",
-              selectRuleSubmit: selectRuleSubmit2
+              selectRuleSubmit: selectRuleSubmit2,
+              gameId: gameId /* gameIdを追加 */
             }}
           />
         ) : (
