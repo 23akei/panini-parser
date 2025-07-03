@@ -26,7 +26,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({
               value={undefined} // これにより、コンポーネントは非制御モードで動作します
               onChange={(e) => onRuleChange(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              placeholder="例: 3.1.68 または規則名"
+              placeholder="Example: 3.1.68 or rule name"
               disabled={gameState !== 'playing'}
             />
           </div>
