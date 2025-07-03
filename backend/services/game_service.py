@@ -87,6 +87,12 @@ class GameService(IGameService):
             )
         is_correct = session.history[step_id-1].code == request.sutra
         next_step_id = step_id + 1 if is_correct and step_id < len(session.history) else step_id
+        if is_correct and step_id == len(session.history):
+            next_step_id = None
+        elif is_correct:
+            next_step_id = step_id + 1
+        else:
+            next_step_id = step_id
         self.sessions[game_id].current_step = next_step_id
         self.sessions[game_id].score += 10 if is_correct else 0  # Increment score for correct answer
         
@@ -101,7 +107,7 @@ class GameService(IGameService):
         return SubmitAnswerResponse(
             correct=is_correct,
             explanation=f"The rule {request.sutra} {'is' if is_correct else 'is not'} applicable to the transformation.",
-            next_step_id=step_id + 1 if is_correct and step_id < len(session.history) else step_id
+            next_step_id=next_step_id   
         )
 
     async def get_game_status(self, game_id: str) -> GameStatusResponse:
