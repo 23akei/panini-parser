@@ -5,6 +5,7 @@ import HPDisplay from '../components/HPDisplay';
 import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import { ApiClient } from '../api/client';
+import { useGameInput } from '../contexts/GameInputContext';
 
 // Sutra選択肢の型定義
 interface SutraChoice {
@@ -16,11 +17,21 @@ interface SutraChoice {
 export type { SutraChoice };
 
 // Sutra選択肢を表示するコンポーネント
-const SutraChoicesComponent: React.FC<{
+interface SutraChoicesComponentProps {
   choices: Promise<SutraChoice[]>;
   onSelect: (choice: SutraChoice) => void;
   disabled: boolean;
-}> = ({ choices, onSelect, disabled }) => {
+  onHover?: (index: number) => void;
+  selectedIndex: number;
+}
+
+const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({ 
+  choices, 
+  onSelect, 
+  disabled, 
+  onHover, 
+  selectedIndex 
+}) => {
   const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
 
   useEffect(() => {
@@ -38,15 +49,20 @@ const SutraChoicesComponent: React.FC<{
   return (
     <div className="mt-4">
       <div className="grid grid-cols-2 gap-4 w-max mx-auto">
-        {choiceList.map(choice => (
+        {choiceList.map((choice, idx) => (
           <button
             key={choice.sutra}
             onClick={() => onSelect(choice)}
+            onMouseOver={() => onHover && onHover(idx)}
             disabled={disabled}
-            className={`text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
-              bg-transparent text-white border-white
+            className={`
+              text-4xl py-2 px-4 rounded-lg font-medium transition-colors text-center border-2
+              ${selectedIndex === idx
+                ? 'bg-[#00D1A8] text-pink-500 border-pink-500'
+                : 'bg-transparent text-white border-white'}
               hover:bg-[#00D1A8] hover:text-pink-500 hover:border-pink-500
-              disabled:opacity-50 disabled:cursor-not-allowed`}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
           >
             {choice.sutra}
           </button>
@@ -70,7 +86,12 @@ interface EasyGameMultiScreenProps {
   player2: PlayerProps;
 }
 
-const PlayerSection: React.FC<PlayerProps> = ({
+interface PlayerSectionProps extends PlayerProps {
+  gameId: string;
+  maxHitPoints: number;
+}
+
+const PlayerSection: React.FC<PlayerSectionProps> = ({
   gameState,
   hitPoints,
   playerScore,
@@ -95,6 +116,50 @@ const PlayerSection: React.FC<PlayerProps> = ({
     return getChoices();
   }, [gameId, currentQuestionDataIndex]);
 
+  // Controller integration for multi-player
+  const { devices, markInputProcessed } = useGameInput();
+  const isPlayer1 = playerName === 'Player 1';
+  const device = isPlayer1 ? devices.player1 : devices.player2;
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
+
+  // Load choices for controller navigation
+  useEffect(() => {
+    const fetchChoices = async () => {
+      try {
+        const result = await choices;
+        setChoiceList(result);
+      } catch (err) {
+        console.error('Failed to fetch sutra choices:', err);
+      }
+    };
+    fetchChoices();
+  }, [choices]);
+
+  // Controller input monitoring
+  useEffect(() => {
+    if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
+    if (choiceList.length === 0) return;
+
+    // Navigation with directional input
+    if (device.lastInput.direction === 'right') {
+      setSelectedIndex((selectedIndex + 1) % choiceList.length);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    } else if (device.lastInput.direction === 'left') {
+      setSelectedIndex((selectedIndex - 1 + choiceList.length) % choiceList.length);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    } else if (device.lastInput.button === 'b') {
+      // Submit selection
+      selectRuleSubmit(choiceList[selectedIndex]);
+      markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
+    }
+  }, [device.lastInput, device.inputProcessed, gameState, choiceList, selectRuleSubmit, markInputProcessed, isPlayer1, selectedIndex]);
+
+  // Reset selection when question changes
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [currentQuestionDataIndex, gameId]);
+
   return (
     <div className="h-screen rounded-lg p-4 border-[12px] border-pink-400 bg-[#001f3f]">
       <div className="rounded-lg p-4"></div>
@@ -117,7 +182,9 @@ const PlayerSection: React.FC<PlayerProps> = ({
           <SutraChoicesComponent
             choices={choices}
             onSelect={selectRuleSubmit}
+            onHover={(idx: number) => setSelectedIndex(idx)}
             disabled={gameState !== 'playing'}
+            selectedIndex={selectedIndex}
           />
         </div>
       </div>

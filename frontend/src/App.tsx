@@ -271,8 +271,10 @@ const SanskritGrammarGame = () => {
   const singleDamageHP = () => {
     if (hitPoints > 1) {
       setHitPoints(prev => prev - 1);
+      showHpChangeEffect1(true); // Show damage effect
     } else {
       setHitPoints(0);
+      showHpChangeEffect1(true); // Show damage effect
       handleGameFail(); // HPがなくなるとゲーム失敗
     }
   }
@@ -389,6 +391,10 @@ const SanskritGrammarGame = () => {
 
   const selectRuleSubmitSinglePlay = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
+    
+    // Show answer feedback for single player
+    showAnswerFeedback1(result.correct);
+    
     if (result.correct === true) {
       if (!result.next_step_id) {
         handleGameWin();
