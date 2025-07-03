@@ -63,22 +63,6 @@ const SanskritGrammarGame = () => {
   const [userInput2, setUserInput2] = useState<string>('');
 
   /**
-   * 時間のカウントダウン処理
-   */
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (gameState === 'playing' && timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
-    } else if (timer === 0 && gameState === 'playing') {
-      setGameState('stopped');
-      handleGameFail(); // 時間切れでゲーム失敗
-    }
-    return () => clearInterval(interval);
-  }, [gameState, timer]);
-
-  /**
    * 関数定義
    */
   // Map UI difficulty to API difficulty

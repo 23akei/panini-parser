@@ -10,6 +10,37 @@ import type { PlayerProps } from '../types/interfaces';
 import type { Question } from '../types/interfaces';
 import HintsPanel from '../components/HintsPanel';
 
+// Sutra選択肢の型定義
+interface SutraChoice {
+  id: string;
+  text: string;
+}
+
+// Sutra選択肢を表示するコンポーネント
+const SutraChoicesComponent: React.FC<{
+  choices: SutraChoice[];
+  onSelect: (choice: SutraChoice) => void;
+  disabled: boolean;
+}> = ({ choices, onSelect, disabled }) => {
+  return (
+    <div className="mt-4 space-y-2">
+      <h3 className="font-semibold text-gray-700">Select rule:</h3>
+      <div className="grid grid-cols-1 gap-2">
+        {choices.map(choice => (
+          <button
+            key={choice.id}
+            onClick={() => onSelect(choice)}
+            disabled={disabled}
+            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg font-medium transition-colors text-left"
+          >
+            {choice.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 interface HardGameMultiScreenProps {
   gameId: string; // 追加: ゲームID
   gameState: 'stopped' | 'playing' | 'paused';
@@ -35,9 +66,18 @@ const PlayerSection: React.FC<PlayerProps> = ({
   playerName,
   gameId
 }) => {
+  // Sutraの選択肢を取得する関数
+  const getChoices = (): SutraChoice[] => {
+    return [
+      { id: "choice1", text: "Sample rule: 1.1.1" },
+      { id: "choice2", text: "Sample rule: 2.1.1" },
+      { id: "choice3", text: "Sample rule: 3.1.1" },
+      { id: "choice4", text: "Sample rule: 4.1.1" },
+    ];
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
-      <p>DEBUG: gameId = {gameId} </p>
       <div className="flex items-center space-x-4">
           <HPDisplay hitPoints={hitPoints} />
       </div>
@@ -46,10 +86,15 @@ const PlayerSection: React.FC<PlayerProps> = ({
       </div>
       <QuestionDisplay currentQuestion={questions[currentQuestionDataIndex]} />
       <div className="grid grid-cols-1 gap-4 mb-4">
-        <RuleInputForm
+        {/* <RuleInputForm
           gameState={gameState}
           onRuleChange={setUserInput}
           onSubmit={(questions: Question[]) => handleRuleSubmit(questions)}
+        /> */}
+        <SutraChoicesComponent
+          choices={getChoices()}
+          onSelect={(choice) => console.log(`Selected: ${choice.text}`)}
+          disabled={gameState !== 'playing'}
         />
       </div>
     </div>
@@ -74,15 +119,6 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
       <h1 className="text-2xl font-bold text-center mb-6">
         Sanskrit Grammar Game - Two Player Mode (Hard)
       </h1>
-        <p>DEBUG: Game ID: {gameId}</p> {/* デバッグ用にゲームIDを表示 */}
-
-        {/* <GameControls
-          gameState={gameState}
-          onStart={startGame}
-          onPause={pauseGame}
-          onReset={resetGame}
-        /> */}
-        {/* <Timer timer={timer} /> */}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '1.5rem', overflowX: 'auto' }}>
         <div style={{ width: '50%', minWidth: '400px' }}>
           <PlayerSection 
@@ -104,7 +140,7 @@ const HardGameMultiScreen: React.FC<HardGameMultiScreenProps> = ({
           />
         </div>
       </div>
-      {/* <HintsPanel />   */}
+
     </div>
   );
 };
