@@ -5,12 +5,14 @@ interface AnswerFeedbackProps {
   isVisible: boolean;
   isCorrect: boolean;
   onComplete: () => void;
+  playerId?: number;
 }
 
 const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
   isVisible,
   isCorrect,
-  onComplete
+  onComplete,
+  playerId
 }) => {
   const variants = {
     initial: {
@@ -63,11 +65,23 @@ const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
     }
   }, [isVisible, onComplete]);
 
+  // Determine positioning based on playerId
+  const getPositionClass = () => {
+    if (playerId === 1) {
+      return "fixed inset-0 flex items-start justify-start pl-20 pt-20 z-40 pointer-events-none";
+    } else if (playerId === 2) {
+      return "fixed inset-0 flex items-start justify-end pr-20 pt-20 z-40 pointer-events-none";
+    } else {
+      // Default to center if no playerId specified
+      return "fixed inset-0 flex items-start justify-center pt-20 z-40 pointer-events-none";
+    }
+  };
+
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 flex items-start justify-center pt-20 z-40 pointer-events-none"
+          className={getPositionClass()}
           variants={containerVariants}
           initial="initial"
           animate="animate"

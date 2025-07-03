@@ -71,7 +71,11 @@ const SanskritGrammarGame = () => {
   const [maxHitPoints, setMaxHitPoints] = useState(MAXIMUM_HIT_POINTS);
 
   // Effect states for visual and audio feedback
-  const [answerFeedback, setAnswerFeedback] = useState<{ isVisible: boolean; isCorrect: boolean }>({
+  const [answerFeedback1, setAnswerFeedback1] = useState<{ isVisible: boolean; isCorrect: boolean }>({
+    isVisible: false,
+    isCorrect: false
+  });
+  const [answerFeedback2, setAnswerFeedback2] = useState<{ isVisible: boolean; isCorrect: boolean }>({
     isVisible: false,
     isCorrect: false
   });
@@ -122,12 +126,20 @@ const SanskritGrammarGame = () => {
   };
 
   // Helper functions for effects
-  const showAnswerFeedback = (isCorrect: boolean) => {
-    setAnswerFeedback({ isVisible: true, isCorrect });
+  const showAnswerFeedback1 = (isCorrect: boolean) => {
+    setAnswerFeedback1({ isVisible: true, isCorrect });
   };
 
-  const hideAnswerFeedback = () => {
-    setAnswerFeedback({ isVisible: false, isCorrect: false });
+  const hideAnswerFeedback1 = () => {
+    setAnswerFeedback1({ isVisible: false, isCorrect: false });
+  };
+
+  const showAnswerFeedback2 = (isCorrect: boolean) => {
+    setAnswerFeedback2({ isVisible: true, isCorrect });
+  };
+
+  const hideAnswerFeedback2 = () => {
+    setAnswerFeedback2({ isVisible: false, isCorrect: false });
   };
 
   const showGameEndEffect = (isVictory: boolean) => {
@@ -278,8 +290,8 @@ const SanskritGrammarGame = () => {
   const selectRuleSubmit = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
 
-    // Show answer feedback
-    showAnswerFeedback(result.correct);
+    // Show answer feedback for Player 1
+    showAnswerFeedback1(result.correct);
 
     // Continue immediately without waiting for feedback
     if (result.correct === true) {
@@ -296,8 +308,8 @@ const SanskritGrammarGame = () => {
   const selectRuleSubmit2 = async (choice: SutraChoice) => {
     const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
 
-    // Show answer feedback
-    showAnswerFeedback(result.correct);
+    // Show answer feedback for Player 2
+    showAnswerFeedback2(result.correct);
 
     // Continue immediately without waiting for feedback
     if (result.correct === true) {
@@ -508,9 +520,17 @@ const SanskritGrammarGame = () => {
 
         {/* Effect Components */}
         <AnswerFeedback
-          isVisible={answerFeedback.isVisible}
-          isCorrect={answerFeedback.isCorrect}
-          onComplete={hideAnswerFeedback}
+          isVisible={answerFeedback1.isVisible}
+          isCorrect={answerFeedback1.isCorrect}
+          onComplete={hideAnswerFeedback1}
+          playerId={1}
+        />
+        
+        <AnswerFeedback
+          isVisible={answerFeedback2.isVisible}
+          isCorrect={answerFeedback2.isCorrect}
+          onComplete={hideAnswerFeedback2}
+          playerId={2}
         />
 
         <GameEndEffects
