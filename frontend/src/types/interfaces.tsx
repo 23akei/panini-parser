@@ -19,11 +19,11 @@ export interface GameScreenProps {
   gameState: 'stopped' | 'playing' | 'paused';
   timer: number;
   hitPoints: number;
-  currentQuestion: string;
+  currentQuestion?: Question;
   userRule: string;
   playerScore: number;
   difficulty: 'EASY' | 'HARD';
-  currentQuestionData: Question;
+  currentQuestionData?: Question;
   startGame: () => void;
   pauseGame: () => void;
   resetGame: () => void;

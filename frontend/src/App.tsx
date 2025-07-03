@@ -80,10 +80,11 @@ const SanskritGrammarGame = () => {
       setGameState('playing');
     }
   };
-  
+
   // 問題データを取得する関数
   const getQuestions = async (): Promise<{ value1: Question[]; value2: string }> => {
-    const startGameResult = await ApiClient.startGame()
+    const apiLevel = mapDifficultyToApiLevel(difficulty);
+    const startGameResult = await ApiClient.startGame(apiLevel)
     return {
       value1: mapStepsToQuestions(startGameResult),
       value2: startGameResult.game_id // APIから取得したゲームIDを使用  
@@ -282,9 +283,53 @@ const SanskritGrammarGame = () => {
 
       {currentScreen === 'game' && gameMode === 'single' && (
         difficulty === 'HARD' ? (
-          <p>Not implemented!!!</p>
+          <HardGameScreen 
+            gameId={gameId}
+            gameState={gameState}
+            timer={timer}
+            questions={questions || []}
+            currentQuestionDataIndex={currentQuestionDataIndex}
+            difficulty={difficulty}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            player={{
+              gameState: gameState,
+              hitPoints: hitPoints,
+              playerScore: playerScore,
+              questions: questions || [],
+              currentQuestionDataIndex: currentQuestionDataIndex,
+              setUserInput: setUserInput,
+              handleRuleSubmit: handleRuleSubmit,
+              playerName: "Player",
+              selectRuleSubmit: selectRuleSubmit,
+              gameId: gameId
+            }}
+          />
         ) : (
-          <p>Not implemented!!!</p>
+          <EasyGameScreen 
+            gameId={gameId}
+            gameState={gameState}
+            timer={timer}
+            questions={questions || []}
+            currentQuestionDataIndex={currentQuestionDataIndex}
+            difficulty={difficulty}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            player={{
+              gameState: gameState,
+              hitPoints: hitPoints,
+              playerScore: playerScore,
+              questions: questions || [],
+              currentQuestionDataIndex: currentQuestionDataIndex,
+              setUserInput: setUserInput,
+              handleRuleSubmit: handleRuleSubmit,
+              playerName: "Player",
+              selectRuleSubmit: selectRuleSubmit,
+              gameId: gameId
+            }}
+          />
         )
       )}
 
@@ -326,7 +371,41 @@ const SanskritGrammarGame = () => {
             }}
           />
         ) : (
-           <p>Not implemented!!!</p>
+          <EasyGameMultiScreen 
+            gameId={gameId}
+            gameState={gameState}
+            timer={timer}
+            questions={questions || []}
+            currentQuestionDataIndex={currentQuestionDataIndex}
+            difficulty={difficulty}
+            startGame={startGame}
+            pauseGame={pauseGame}
+            resetGame={resetGame}
+            player1={{
+              gameState: gameState,
+              hitPoints: hitPoints,
+              playerScore: playerScore,
+              questions: questions || [],
+              currentQuestionDataIndex: currentQuestionDataIndex,
+              setUserInput: setUserInput,
+              handleRuleSubmit: handleRuleSubmit,
+              playerName: "Player 1",
+              selectRuleSubmit: selectRuleSubmit,
+              gameId: gameId
+            }}
+            player2={{
+              gameState: gameState,
+              hitPoints: hitPoints2,
+              playerScore: playerScore2,
+              questions: questions || [],
+              currentQuestionDataIndex: currentQuestionDataIndex,
+              setUserInput: setUserInput2,
+              handleRuleSubmit: handleRuleSubmit2,
+              playerName: "Player 2",
+              selectRuleSubmit: selectRuleSubmit2,
+              gameId: gameId
+            }}
+          />
         )
       )}
 
