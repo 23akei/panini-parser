@@ -26,6 +26,7 @@ import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
 import type { SutraChoice } from './screens/HardGameMultiScreen';
 import { GameInputProvider } from './contexts/GameInputContext';
+import ConnectControllerScreenSingle from './screens/ConnectControllerScreenSingle';
 
 const SanskritGrammarGame = () => {
   /**
@@ -51,7 +52,7 @@ const SanskritGrammarGame = () => {
 
   // Timer effect
   const [difficulty, setDifficulty] = useState<'EASY' | 'HARD'>('EASY');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'connectController' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'modeSelect' | 'connectController' | 'connectControllerSingle' | 'game' | 'results' | 'gameClear' | 'gameClear2' | 'gameFailed'>('home');
   const [gameMode, setGameMode] = useState<'single' | 'multi'>('single');
   const [timer, setTimer] = useState(INIT_TIMER);
 
@@ -408,6 +409,11 @@ const SanskritGrammarGame = () => {
     setCurrentScreen('connectController'); // ConnectController画面に遷移
   };
 
+  const handleDifficultySelectSingle = (selectedDifficulty: 'EASY' | 'HARD') => {
+    setDifficulty(selectedDifficulty);
+    setCurrentScreen('connectControllerSingle'); // ConnectController画面に遷移
+  };
+
   const handleConnectComplete = async () => {
     setCurrentScreen('game');
     await resetGame();
@@ -420,7 +426,14 @@ const SanskritGrammarGame = () => {
           <HomeScreen onSelectMode={handleModeSelect} />
         )}
 
-        {currentScreen === 'modeSelect' && (
+        {currentScreen === 'modeSelect' && gameMode === 'single' && (
+          <ModeSelectScreen
+            gameMode={gameMode}
+            onSelectDifficulty={handleDifficultySelectSingle}
+          />
+        )}
+
+        {currentScreen === 'modeSelect' && gameMode === 'multi' && (
           <ModeSelectScreen
             gameMode={gameMode}
             onSelectDifficulty={handleDifficultySelect}
@@ -429,6 +442,12 @@ const SanskritGrammarGame = () => {
 
         {currentScreen === 'connectController' && (
           <ConnectControllerScreen
+            onConnectComplete={handleConnectComplete}
+          />
+        )}
+
+        {currentScreen === 'connectControllerSingle' && (
+          <ConnectControllerScreenSingle
             onConnectComplete={handleConnectComplete}
           />
         )}
