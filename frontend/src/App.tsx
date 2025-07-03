@@ -20,7 +20,7 @@ import DifficultySelector from './components/DifficultySelector';
 import { useGameOperations, useGameStatus } from './hooks/useGame';
 import { type StartGameResponse, type GameStep, ApiClient } from './api/client';
 import { mapStepsToQuestions } from './mapper/mapper';
-import type { SutraChoice } from '../components/SutraChoices';
+import type { SutraChoice } from './screens/HardGameMultiScreen';
 
 const SanskritGrammarGame = () => {
   /**
@@ -259,7 +259,7 @@ const SanskritGrammarGame = () => {
   };
 
   const selectRuleSubmit = async (choice: SutraChoice) => {
-    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.desc })
+    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP2();
     } else {
@@ -273,7 +273,7 @@ const SanskritGrammarGame = () => {
   }
 
     const selectRuleSubmit2 = async (choice: SutraChoice) => {
-    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.desc })
+    const result = await ApiClient.submitAnswer(gameId, currentQuestionDataIndex + 1, { sutra: choice.sutra })
     if (result.correct === true) {
       damageHP();
     } else {

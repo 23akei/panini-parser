@@ -29,14 +29,16 @@ const SutraChoicesComponent: React.FC<{
   const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
 
   useEffect(() => {
-    async () => {
+    const fetchChoices = async () => {
       try {
         const result = await choices;
         setChoiceList(result);
       } catch (err) {
         console.error('Failed to fetch sutra choices:', err);
       }
-  }});
+  };
+  fetchChoices();
+}, [choices]);
 
   return (
     <div className="mt-4 space-y-2">
@@ -91,7 +93,6 @@ const PlayerSection: React.FC<PlayerProps> = ({
     //   { sutra: "choice3", desc: "Sample rule: 3.1.1" },
     //   { sutra: "choice4", desc: "Sample rule: 4.1.1" },
     // ];
-    console.log(gameId)
     const result = (await ApiClient.getSutraChoices(gameId, currentQuestionDataIndex+1)).choices;
     return result.map(choice => ({
       sutra: choice.sutra,
