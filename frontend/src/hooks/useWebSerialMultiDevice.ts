@@ -124,6 +124,7 @@ export const useWebSerialMultiDevice = () => {
 
   return {
     devices,
+    markInputProcessed,
     connect,
     disconnect
   };

@@ -6,22 +6,16 @@ interface ConnectControllerScreenProps {
 }
 
 const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onConnectComplete }) => {
-  // const [player1Connected, setPlayer1Connected] = useState(false);
-  // const [player2Connected, setPlayer2Connected] = useState(false);
-  const { connect } = useGameInput();
-
-  const { devices } = useGameInput(); // devicesは現在の接続状態を取得
+  const { connect, devices } = useGameInput();
   console.log(devices.player1.lastInput, " ", devices.player1.isToggled, " ", devices.player1.inputProcessed);
   console.log(devices.player2.lastInput, " ", devices.player2.isToggled, " ", devices.player2.inputProcessed);
 
   const handlePlayer1Connect = () => {
     connect(1);
-    setdevices.player1.isConnected(true);
   };
 
   const handlePlayer2Connect = () => {
     connect(2);
-    setdevices.player2.isConnected(true);
   };
 
   const canStartGame = devices.player1.isConnected && devices.player2.isConnected;
@@ -31,10 +25,10 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
     let timer: ReturnType<typeof setTimeout>;
 
     if (devices.player1.isConnected && devices.player2.isConnected) {
-      // 両方が接続されたら1.5秒後に遷移
+      // 両方が接続されたら2秒後に遷移
       timer = setTimeout(() => {
         onConnectComplete();
-      }, 1500);
+      }, 2000);
     } else {
       // どちらかが接続されていなければ10秒後に遷移
       timer = setTimeout(() => {
