@@ -25,12 +25,12 @@ interface SutraChoicesComponentProps {
   selectedIndex: number;
 }
 
-const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({ 
-  choices, 
-  onSelect, 
-  disabled, 
-  onHover, 
-  selectedIndex 
+const SutraChoicesComponent: React.FC<SutraChoicesComponentProps> = ({
+  choices,
+  onSelect,
+  disabled,
+  onHover,
+  selectedIndex
 }) => {
   const [choiceList, setChoiceList] = useState<SutraChoice[]>([]);
 
@@ -146,12 +146,15 @@ const PlayerSection: React.FC<PlayerSectionProps> = ({
     if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
     if (choiceList.length === 0) return;
 
-    // Navigation with directional input (vertical layout)
-    if (device.lastInput.direction === 'down' || device.lastInput.direction === 'right') {
-      setSelectedIndex((selectedIndex + 1) % choiceList.length);
+    let answerIndex = choiceList.findIndex(choice => choice.answer);
+    let nextAnswerIndex = answerIndex > selectedIndex ? selectedIndex + 1 : (answerIndex < selectedIndex ? selectedIndex - 1 : answerIndex);
+
+    // Navigation with directional input
+    if (device.lastInput.direction === 'right') {
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.direction === 'up' || device.lastInput.direction === 'left') {
-      setSelectedIndex((selectedIndex - 1 + choiceList.length) % choiceList.length);
+    } else if (device.lastInput.direction === 'left') {
+      setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'b') {
       // Submit selection
@@ -214,7 +217,7 @@ const EasyGameMultiScreen: React.FC<EasyGameMultiScreenProps> = ({
     <div className="h-screen flex bg-[#001f3f] p-4 gap-6 overflow-hidden">
       <audio src="main.m4a" autoPlay loop id="myAudio"></audio>
       <div className="flex-1 h-full">
-        <PlayerSection 
+        <PlayerSection
           {...player1}
           playerName="Player 1"
           questions={questions || []}
@@ -224,7 +227,7 @@ const EasyGameMultiScreen: React.FC<EasyGameMultiScreenProps> = ({
       </div>
 
       <div className="flex-1">
-        <PlayerSection 
+        <PlayerSection
           {...player2}
           playerName="Player 2"
           questions={questions || []}
