@@ -49,7 +49,7 @@ const SutraChoicesComponent: React.FC<{
               hover:bg-[#00D1A8] hover:text-pink-500 hover:border-pink-500
               disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            {choice.sutra} {choice.answer ? '✔️' : '❌'}
+            {choice.sutra}
           </button>
         ))}
       </div>
