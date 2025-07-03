@@ -69,6 +69,7 @@ class SutraChoice(BaseModel):
     """Individual sutra choice option"""
     sutra: str = Field(description="Panini rule number")
     description: str = Field(description="Rule description")
+    answer: bool = Field(default=False, description="Indicates if this is the correct answer (optional)")
 
 
 class GetChoicesResponse(BaseModel):
