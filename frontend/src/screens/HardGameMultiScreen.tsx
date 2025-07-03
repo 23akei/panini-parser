@@ -130,10 +130,10 @@ const PlayerSection = ({
     if (!device.lastInput || device.inputProcessed || gameState !== 'playing') return;
     if (choiceList.length === 0) return;
     // 方向入力で選択肢移動
-    if (device.lastInput.direction === 'right' || device.lastInput.direction === 'down') {
+    if (device.lastInput.direction === 'right') {
       setSelectedIndex(selectedIndex => (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.direction === 'left' || device.lastInput.direction === 'up') {
+    } else if (device.lastInput.direction === 'left') {
       setSelectedIndex(selectedIndex => (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'a') {
