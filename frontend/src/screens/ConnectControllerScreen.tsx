@@ -30,10 +30,10 @@ const ConnectControllerScreen: React.FC<ConnectControllerScreenProps> = ({ onCon
         onConnectComplete();
       }, 2000);
     } else {
-      // どちらかが接続されていなければ10秒後に遷移
+      // どちらかが接続されていなければ20秒後に遷移
       timer = setTimeout(() => {
         onConnectComplete();
-      }, 10000);
+      }, 20000);
     } 
     return () => clearTimeout(timer); // クリーンアップ必須 :contentReference[oaicite:1]{index=1}
   }, [
