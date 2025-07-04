@@ -150,10 +150,10 @@ const PlayerSection: React.FC<PlayerSectionProps> = ({
     let nextAnswerIndex = answerIndex > selectedIndex ? selectedIndex + 1 : (answerIndex < selectedIndex ? selectedIndex - 1 : answerIndex);
 
     // Navigation with directional input
-    if (device.lastInput.direction === 'right') {
+    if (device.lastInput.direction === 'down' || device.lastInput.direction === 'right') {
       setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex + 1) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
-    } else if (device.lastInput.direction === 'left') {
+    } else if (device.lastInput.direction === 'up' || device.lastInput.direction === 'left') {
       setSelectedIndex(device.isToggled ? nextAnswerIndex : (selectedIndex - 1 + choiceList.length) % choiceList.length);
       markInputProcessed && markInputProcessed(isPlayer1 ? 1 : 2);
     } else if (device.lastInput.button === 'b') {
