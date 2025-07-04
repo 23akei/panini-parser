@@ -8,7 +8,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectMode }) => {
 
   return (
     <div className="min-h-screen flex border-[12px] border-pink-400 bg-[#001f3f]">
-      <audio src="intro.m4a" autoPlay loop id="myAudio"></audio>
+      {/* <audio src="intro.m4a" autoPlay loop id="myAudio"></audio> */}
       {/* left */}
       <div className="w-1/2 flex items-center justify-center">
         <img
